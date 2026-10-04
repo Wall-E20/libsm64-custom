@@ -77,9 +77,9 @@ struct SM64MarioState
     /*0x07*/ int8_t wingFlutter; /// whether Mario's wing cap wings are fluttering
     /*0x08*/ int16_t modelState;
     /*0x0A*/ int8_t grabPos;
-    /*0x0B*/ uint8_t punchState; /// 2 bits for type of punch, 6 bits for punch animation timer
-    /*0x0C*/ int16_t torsoAngle[3];
-    /*0x12*/ int16_t headAngle[3];
+//    /*0x0B*/ uint8_t punchState; /// 2 bits for type of punch, 6 bits for punch animation timer
+// /*0x0C*/ int16_t torsoAngle[3];
+// /*0x12*/ int16_t headAngle[3];
     /*0x18*/ float heldObjLastPosition[3]; /// also known as HOLP
     int8_t lodsOverride; //libsm64-custom added
     int8_t lodState; //libsm64-custom added

@@ -76,6 +76,7 @@ int main( void )
     sm64_audio_init(rom);
     sm64_static_surfaces_load( surfaces, surfaces_count );
     int32_t marioId = sm64_mario_create( 0, 1000, 0 );
+    sm64_set_mario_action(marioId, 0x0000192A);
     
     free( rom );
 
@@ -124,13 +125,13 @@ int main( void )
         float dt = (SDL_GetTicks() - lastTicks) / 1000.f;
         lastTicks = SDL_GetTicks();
         tick += dt;
-
+        const Uint8* state = SDL_GetKeyboardState(NULL);
         SDL_GameController *controller = context_get_controller();
         float x_axis, y_axis, x0_axis;
 
         if (!controller) // keyboard
         {
-            const Uint8* state = SDL_GetKeyboardState(NULL);
+            
             
             float dir;
             float spd = 0;
@@ -201,8 +202,15 @@ int main( void )
             marioInputs.buttonR = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT );
             marioInputs.buttonU = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_UP );
             marioInputs.buttonD = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN );
-        }
 
+
+        }
+            if (state[SDL_SCANCODE_R]){
+                sm64_set_mario_action(marioId, 0x0100088C);
+            }
+            if (state[SDL_SCANCODE_T]){
+                sm64_set_mario_action(marioId, 0x00001302);
+            }
         //cameraRot += x0_axis * dt * 2;
         //cameraPos[0] = marioState.camPos[0] + 1000.0f * cosf( cameraRot );
         //cameraPos[1] = marioState.camPos[1] + 200.0f;
@@ -212,10 +220,11 @@ int main( void )
         marioInputs.camLookZ = marioState.position[2] - cameraPos[2];
         marioInputs.stickX = -x_axis;
         marioInputs.stickY = -y_axis;
-        marioState.lodState = 0x02;
-        marioState.lodsOverride = 0;
+        marioState.lodState = 2;
+        marioState.lodsOverride = 1;
+        //sm64_set_mario_water_level(marioId, 300);
         while (tick >= 1.f/60)
-        {
+        {   
             memcpy(lastPos, currPos, sizeof(currPos));
             memcpy(lastGeoPos, currGeoPos, sizeof(currGeoPos));
 

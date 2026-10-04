@@ -133,7 +133,7 @@ extern s16 unused8033B31A;
 extern s16 sCameraSoundFlags;
 extern u16 sCButtonsPressed;
 extern s16 sCutsceneDialogID;
-extern struct LakituState gLakituState;
+//extern struct LakituState gLakituState;
 extern s16 unused8033B3E8;
 extern s16 sAreaYaw;
 extern s16 sAreaYawChange;
@@ -175,7 +175,7 @@ extern struct Camera *gCamera;
  * Lakitu's position and focus.
  * @see LakituState
  */
-struct LakituState gLakituState;
+//struct LakituState gLakituState;
 struct CameraFOVStatus sFOVState;
 struct TransitionInfo sModeTransition;
 struct PlayerGeometry sMarioGeometry;
@@ -494,8 +494,8 @@ void set_camera_shake_from_hit(s16 shake) {
     switch (shake) {
         // Makes the camera stop for a bit
         case SHAKE_ATTACK:
-            gLakituState.focHSpeed = 0;
-            gLakituState.posHSpeed = 0;
+            gLakituState->focHSpeed = 0;
+            gLakituState->posHSpeed = 0;
             break;
 
         case SHAKE_FALL_DAMAGE:
@@ -518,8 +518,8 @@ void set_camera_shake_from_hit(s16 shake) {
                 set_fov_shake(0x100, 0x30, 0x8000);
             }
 
-            gLakituState.focHSpeed = 0;
-            gLakituState.posHSpeed = 0;
+            gLakituState->focHSpeed = 0;
+            gLakituState->posHSpeed = 0;
             break;
 
         case SHAKE_MED_DAMAGE:
@@ -533,8 +533,8 @@ void set_camera_shake_from_hit(s16 shake) {
                 set_fov_shake(0x180, 0x40, 0x8000);
             }
 
-            gLakituState.focHSpeed = 0;
-            gLakituState.posHSpeed = 0;
+            gLakituState->focHSpeed = 0;
+            gLakituState->posHSpeed = 0;
             break;
 
         case SHAKE_LARGE_DAMAGE:
@@ -548,13 +548,13 @@ void set_camera_shake_from_hit(s16 shake) {
                 set_fov_shake(0x200, 0x50, 0x8000);
             }
 
-            gLakituState.focHSpeed = 0;
-            gLakituState.posHSpeed = 0;
+            gLakituState->focHSpeed = 0;
+            gLakituState->posHSpeed = 0;
             break;
 
         case SHAKE_HIT_FROM_BELOW:
-            gLakituState.focHSpeed = 0.07;
-            gLakituState.posHSpeed = 0.07;
+            gLakituState->focHSpeed = 0.07;
+            gLakituState->posHSpeed = 0.07;
             break;
 
         case SHAKE_SHOCK:
@@ -753,7 +753,7 @@ void set_camera_height(struct Camera *c, f32 goalHeight) {
     UNUSED u8 filler[8];
     UNUSED s16 action = sMarioCamState->action;
     f32 baseOff = 125.f;
-    f32 camCeilHeight = find_ceil(c->pos[0], gLakituState.goalPos[1] - 50.f, c->pos[2], &surface);
+    f32 camCeilHeight = find_ceil(c->pos[0], gLakituState->goalPos[1] - 50.f, c->pos[2], &surface);
 
     if (sMarioCamState->action & ACT_FLAG_HANGING) {
         marioCeilHeight = sMarioGeometry.currCeilHeight;
@@ -1491,7 +1491,7 @@ s32 update_fixed_camera(struct Camera *c, Vec3f focus, UNUSED Vec3f pos) {
         && sMarioGeometry.currFloorHeight != FLOOR_LOWER_LIMIT) {
         goalHeight = sMarioGeometry.currFloorHeight + basePos[1] + heightOffset;
     } else {
-        goalHeight = gLakituState.goalPos[1];
+        goalHeight = gLakituState->goalPos[1];
     }
 
     if (300 > distCamToFocus) {
@@ -2088,9 +2088,9 @@ s16 update_default_camera(struct Camera *c) {
     f32 scale;
     s32 avoidStatus = 0;
     s32 closeToMario = 0;
-    f32 ceilHeight = find_ceil(gLakituState.goalPos[0],
-                               gLakituState.goalPos[1],
-                               gLakituState.goalPos[2], &ceil);
+    f32 ceilHeight = find_ceil(gLakituState->goalPos[0],
+                               gLakituState->goalPos[1],
+                               gLakituState->goalPos[2], &ceil);
     s16 yawDir;
 
     handle_c_button_movement(c);
@@ -2351,9 +2351,9 @@ s16 update_default_camera(struct Camera *c) {
     }
     c->pos[0] = cPos[0];
     c->pos[2] = cPos[2];
-    cPos[0] = gLakituState.goalPos[0];
+    cPos[0] = gLakituState->goalPos[0];
     cPos[1] = c->pos[1];
-    cPos[2] = gLakituState.goalPos[2];
+    cPos[2] = gLakituState->goalPos[2];
     vec3f_get_dist_and_angle(cPos, c->pos, &dist, &tempPitch, &tempYaw);
     // Prevent the camera from lagging behind too much
     if (dist > 50.f) {
@@ -2877,7 +2877,7 @@ void set_camera_mode(struct Camera *c, s16 mode, s16 frames) {
         sModeInfo.frame = 1;
 
         c->mode = sModeInfo.newMode;
-        gLakituState.mode = c->mode;
+        gLakituState->mode = c->mode;
 
         vec3f_copy(end->focus, c->focus);
         vec3f_sub(end->focus, sMarioCamState->pos);
@@ -2891,10 +2891,10 @@ void set_camera_mode(struct Camera *c, s16 mode, s16 frames) {
         vec3f_sub(end->focus, sMarioCamState->pos);
         vec3f_sub(end->pos, sMarioCamState->pos);
 
-        vec3f_copy(start->focus, gLakituState.curFocus);
+        vec3f_copy(start->focus, gLakituState->curFocus);
         vec3f_sub(start->focus, sMarioCamState->pos);
 
-        vec3f_copy(start->pos, gLakituState.curPos);
+        vec3f_copy(start->pos, gLakituState->curPos);
         vec3f_sub(start->pos, sMarioCamState->pos);
 
         vec3f_get_dist_and_angle(start->focus, start->pos, &start->dist, &start->pitch, &start->yaw);
@@ -2933,23 +2933,23 @@ void update_lakitu(struct Camera *c) {
         vec3f_copy(sOldPosition, newPos);
         vec3f_copy(sOldFocus, newFoc);
 
-        gLakituState.yaw = c->yaw;
-        gLakituState.nextYaw = c->nextYaw;
-        vec3f_copy(gLakituState.goalPos, c->pos);
-        vec3f_copy(gLakituState.goalFocus, c->focus);
+        gLakituState->yaw = c->yaw;
+        gLakituState->nextYaw = c->nextYaw;
+        vec3f_copy(gLakituState->goalPos, c->pos);
+        vec3f_copy(gLakituState->goalFocus, c->focus);
 
         // Simulate Lakitu flying to the new position and turning towards the new focus
-        set_or_approach_vec3f_asymptotic(gLakituState.curPos, newPos,
-                                         gLakituState.posHSpeed, gLakituState.posVSpeed,
-                                         gLakituState.posHSpeed);
-        set_or_approach_vec3f_asymptotic(gLakituState.curFocus, newFoc,
-                                         gLakituState.focHSpeed, gLakituState.focVSpeed,
-                                         gLakituState.focHSpeed);
+        set_or_approach_vec3f_asymptotic(gLakituState->curPos, newPos,
+                                         gLakituState->posHSpeed, gLakituState->posVSpeed,
+                                         gLakituState->posHSpeed);
+        set_or_approach_vec3f_asymptotic(gLakituState->curFocus, newFoc,
+                                         gLakituState->focHSpeed, gLakituState->focVSpeed,
+                                         gLakituState->focHSpeed);
         // Adjust Lakitu's speed back to normal
-        set_or_approach_f32_asymptotic(&gLakituState.focHSpeed, 0.8f, 0.05f);
-        set_or_approach_f32_asymptotic(&gLakituState.focVSpeed, 0.3f, 0.05f);
-        set_or_approach_f32_asymptotic(&gLakituState.posHSpeed, 0.3f, 0.05f);
-        set_or_approach_f32_asymptotic(&gLakituState.posVSpeed, 0.3f, 0.05f);
+        set_or_approach_f32_asymptotic(&gLakituState->focHSpeed, 0.8f, 0.05f);
+        set_or_approach_f32_asymptotic(&gLakituState->focVSpeed, 0.3f, 0.05f);
+        set_or_approach_f32_asymptotic(&gLakituState->posHSpeed, 0.3f, 0.05f);
+        set_or_approach_f32_asymptotic(&gLakituState->posVSpeed, 0.3f, 0.05f);
 
         // Turn on smooth movement when it hasn't been blocked for 2 frames
         if (sStatusFlags & CAM_FLAG_BLOCK_SMOOTH_MOVEMENT) {
@@ -2958,40 +2958,40 @@ void update_lakitu(struct Camera *c) {
             sStatusFlags |= CAM_FLAG_SMOOTH_MOVEMENT;
         }
 
-        vec3f_copy(gLakituState.pos, gLakituState.curPos);
-        vec3f_copy(gLakituState.focus, gLakituState.curFocus);
+        vec3f_copy(gLakituState->pos, gLakituState->curPos);
+        vec3f_copy(gLakituState->focus, gLakituState->curFocus);
 
         if (c->cutscene) {
-            vec3f_add(gLakituState.focus, sPlayer2FocusOffset);
+            vec3f_add(gLakituState->focus, sPlayer2FocusOffset);
             vec3f_set(sPlayer2FocusOffset, 0, 0, 0);
         }
 
-        vec3f_get_dist_and_angle(gLakituState.pos, gLakituState.focus, &gLakituState.focusDistance,
-                                 &gLakituState.oldPitch, &gLakituState.oldYaw);
+        vec3f_get_dist_and_angle(gLakituState->pos, gLakituState->focus, &gLakituState->focusDistance,
+                                 &gLakituState->oldPitch, &gLakituState->oldYaw);
 
-        gLakituState.roll = 0;
+        gLakituState->roll = 0;
 
         // Apply camera shakes
-        shake_camera_pitch(gLakituState.pos, gLakituState.focus);
-        shake_camera_yaw(gLakituState.pos, gLakituState.focus);
-        shake_camera_roll(&gLakituState.roll);
-        shake_camera_handheld(gLakituState.pos, gLakituState.focus);
+        shake_camera_pitch(gLakituState->pos, gLakituState->focus);
+        shake_camera_yaw(gLakituState->pos, gLakituState->focus);
+        shake_camera_roll(&gLakituState->roll);
+        shake_camera_handheld(gLakituState->pos, gLakituState->focus);
 
-        if (sMarioCamState->action == ACT_DIVE && gLakituState.lastFrameAction != ACT_DIVE) {
+        if (sMarioCamState->action == ACT_DIVE && gLakituState->lastFrameAction != ACT_DIVE) {
             set_camera_shake_from_hit(SHAKE_HIT_FROM_BELOW);
         }
 
-        gLakituState.roll += sHandheldShakeRoll;
-        gLakituState.roll += gLakituState.keyDanceRoll;
+        gLakituState->roll += sHandheldShakeRoll;
+        gLakituState->roll += gLakituState->keyDanceRoll;
 
         if (c->mode != CAMERA_MODE_C_UP && c->cutscene == 0) {
             gCheckingSurfaceCollisionsForCamera = TRUE;
-            distToFloor = find_floor(gLakituState.pos[0],
-                                     gLakituState.pos[1] + 20.0f,
-                                     gLakituState.pos[2], &floor);
+            distToFloor = find_floor(gLakituState->pos[0],
+                                     gLakituState->pos[1] + 20.0f,
+                                     gLakituState->pos[2], &floor);
             if (distToFloor != FLOOR_LOWER_LIMIT) {
-                if (gLakituState.pos[1] < (distToFloor += 100.0f)) {
-                    gLakituState.pos[1] = distToFloor;
+                if (gLakituState->pos[1] < (distToFloor += 100.0f)) {
+                    gLakituState->pos[1] = distToFloor;
                 } else {
                     gCheckingSurfaceCollisionsForCamera = FALSE;
                 }
@@ -3000,9 +3000,9 @@ void update_lakitu(struct Camera *c) {
 
         vec3f_copy(sModeTransition.marioPos, sMarioCamState->pos);
     }
-    clamp_pitch(gLakituState.pos, gLakituState.focus, 0x3E00, -0x3E00);
-    gLakituState.mode = c->mode;
-    gLakituState.defMode = c->defMode;
+    clamp_pitch(gLakituState->pos, gLakituState->focus, 0x3E00, -0x3E00);
+    gLakituState->mode = c->mode;
+    gLakituState->defMode = c->defMode;
 }
 
 
@@ -3047,13 +3047,13 @@ void update_camera(struct Camera *c) {
 
     find_mario_floor_and_ceil(&sMarioGeometry);
     gCheckingSurfaceCollisionsForCamera = TRUE;
-    vec3f_copy(c->pos, gLakituState.goalPos);
-    vec3f_copy(c->focus, gLakituState.goalFocus);
+    vec3f_copy(c->pos, gLakituState->goalPos);
+    vec3f_copy(c->focus, gLakituState->goalFocus);
 
-    c->yaw = gLakituState.yaw;
-    c->nextYaw = gLakituState.nextYaw;
-    c->mode = gLakituState.mode;
-    c->defMode = gLakituState.defMode;
+    c->yaw = gLakituState->yaw;
+    c->nextYaw = gLakituState->nextYaw;
+    c->mode = gLakituState->mode;
+    c->defMode = gLakituState->defMode;
 
     camera_course_processing(c);
     stub_camera_3(c);
@@ -3179,10 +3179,10 @@ void update_camera(struct Camera *c) {
 
             // Fixed mode only prevents Lakitu from moving. The camera pos still updates, so
             // Lakitu will fly to his next position as normal whenever R_TRIG is released.
-            gLakituState.posHSpeed = 0.f;
-            gLakituState.posVSpeed = 0.f;
+            gLakituState->posHSpeed = 0.f;
+            gLakituState->posVSpeed = 0.f;
 
-            c->nextYaw = calculate_yaw(gLakituState.focus, gLakituState.pos);
+            c->nextYaw = calculate_yaw(gLakituState->focus, gLakituState->pos);
             c->yaw = c->nextYaw;
             gCameraMovementFlags &= ~CAM_MOVE_FIX_IN_PLACE;
         } else {
@@ -3200,7 +3200,7 @@ void update_camera(struct Camera *c) {
 
     update_lakitu(c);
 
-    gLakituState.lastFrameAction = sMarioCamState->action;
+    gLakituState->lastFrameAction = sMarioCamState->action;
 }
 
 /**
@@ -3257,16 +3257,16 @@ void reset_camera(struct Camera *c) {
     sLuigiCamState->headRotation[1] = 0;
     sMarioCamState->cameraEvent = 0;
     sMarioCamState->usedObj = NULL;
-    gLakituState.shakeMagnitude[0] = 0;
-    gLakituState.shakeMagnitude[1] = 0;
-    gLakituState.shakeMagnitude[2] = 0;
-    gLakituState.unusedVec2[0] = 0;
-    gLakituState.unusedVec2[1] = 0;
-    gLakituState.unusedVec2[2] = 0;
-    gLakituState.unusedVec1[0] = 0.f;
-    gLakituState.unusedVec1[1] = 0.f;
-    gLakituState.unusedVec1[2] = 0.f;
-    gLakituState.lastFrameAction = 0;
+    gLakituState->shakeMagnitude[0] = 0;
+    gLakituState->shakeMagnitude[1] = 0;
+    gLakituState->shakeMagnitude[2] = 0;
+    gLakituState->unusedVec2[0] = 0;
+    gLakituState->unusedVec2[1] = 0;
+    gLakituState->unusedVec2[2] = 0;
+    gLakituState->unusedVec1[0] = 0.f;
+    gLakituState->unusedVec1[1] = 0.f;
+    gLakituState->unusedVec1[2] = 0.f;
+    gLakituState->lastFrameAction = 0;
     set_fov_function(CAM_FOV_DEFAULT);
     sFOVState.fov = 45.f;
     sFOVState.fovOffset = 0.f;
@@ -3290,15 +3290,15 @@ void init_camera(struct Camera *c) {
     gCurrLevelArea = gCurrLevelNum * 16 + gCurrentArea->index;
     sSelectionFlags &= CAM_MODE_MARIO_SELECTED;
     sFramesPaused = 0;
-    gLakituState.mode = c->mode;
-    gLakituState.defMode = c->defMode;
-    gLakituState.posHSpeed = 0.3f;
-    gLakituState.posVSpeed = 0.3f;
-    gLakituState.focHSpeed = 0.8f;
-    gLakituState.focHSpeed = 0.3f; // @bug set focHSpeed back-to-back
-    gLakituState.roll = 0;
-    gLakituState.keyDanceRoll = 0;
-    gLakituState.unused = 0;
+    gLakituState->mode = c->mode;
+    gLakituState->defMode = c->defMode;
+    gLakituState->posHSpeed = 0.3f;
+    gLakituState->posVSpeed = 0.3f;
+    gLakituState->focHSpeed = 0.8f;
+    gLakituState->focHSpeed = 0.3f; // @bug set focHSpeed back-to-back
+    gLakituState->roll = 0;
+    gLakituState->keyDanceRoll = 0;
+    gLakituState->unused = 0;
     sStatusFlags &= ~CAM_FLAG_SMOOTH_MOVEMENT;
     vec3f_set(sCastleEntranceOffset, 0.f, 0.f, 0.f);
     vec3f_set(sPlayer2FocusOffset, 0.f, 0.f, 0.f);
@@ -3362,7 +3362,7 @@ void init_camera(struct Camera *c) {
             if (is_within_100_units_of_mario(5408.f, 4500.f, 3637.f) == 1) {
                 start_cutscene(c, CUTSCENE_EXIT_FALL_WMOTR);
             }
-            gLakituState.mode = CAMERA_MODE_FREE_ROAM;
+            gLakituState->mode = CAMERA_MODE_FREE_ROAM;
             break;
         case LEVEL_SA:
             marioOffset[2] = 200.f;
@@ -3405,7 +3405,7 @@ void init_camera(struct Camera *c) {
             gCameraMovementFlags |= CAM_MOVE_ZOOMED_OUT;
             break;
         case AREA_TTM_OUTSIDE:
-            gLakituState.mode = CAMERA_MODE_RADIAL;
+            gLakituState->mode = CAMERA_MODE_RADIAL;
             break;
     }*/
 
@@ -3416,20 +3416,20 @@ void init_camera(struct Camera *c) {
                                sMarioCamState->pos[2], &floor) + 125.f;
     }
     vec3f_copy(c->focus, sMarioCamState->pos);
-    vec3f_copy(gLakituState.curPos, c->pos);
-    vec3f_copy(gLakituState.curFocus, c->focus);
-    vec3f_copy(gLakituState.goalPos, c->pos);
-    vec3f_copy(gLakituState.goalFocus, c->focus);
-    vec3f_copy(gLakituState.pos, c->pos);
-    vec3f_copy(gLakituState.focus, c->focus);
+    vec3f_copy(gLakituState->curPos, c->pos);
+    vec3f_copy(gLakituState->curFocus, c->focus);
+    vec3f_copy(gLakituState->goalPos, c->pos);
+    vec3f_copy(gLakituState->goalFocus, c->focus);
+    vec3f_copy(gLakituState->pos, c->pos);
+    vec3f_copy(gLakituState->focus, c->focus);
     if (c->mode == CAMERA_MODE_FIXED) {
         set_fixed_cam_axis_sa_lobby(c->mode);
     }
     store_lakitu_cam_info_for_c_up(c);
-    gLakituState.yaw = calculate_yaw(c->focus, c->pos);
-    gLakituState.nextYaw = gLakituState.yaw;
-    c->yaw = gLakituState.yaw;
-    c->nextYaw = gLakituState.yaw;
+    gLakituState->yaw = calculate_yaw(c->focus, c->pos);
+    gLakituState->nextYaw = gLakituState->yaw;
+    c->yaw = gLakituState->yaw;
+    c->nextYaw = gLakituState->yaw;
 }
 
 /**
@@ -3511,9 +3511,9 @@ void update_graph_node_camera(struct GraphNodeCamera *gc) {
     UNUSED u8 unused[8];
     UNUSED struct Camera *c = gc->config.camera;
 
-    gc->rollScreen = gLakituState.roll;
-    vec3f_copy(gc->pos, gLakituState.pos);
-    vec3f_copy(gc->focus, gLakituState.focus);
+    gc->rollScreen = gLakituState->roll;
+    vec3f_copy(gc->pos, gLakituState->pos);
+    vec3f_copy(gc->focus, gLakituState->focus);
     zoom_out_if_paused_and_outside(gc);
 }
 
@@ -4270,18 +4270,18 @@ s16 reduce_by_dist_from_camera(s16 value, f32 maxDist, f32 posX, f32 posY, f32 p
     s16 goalYaw;
     s16 result = 0;
     // Direction from pos to (Lakitu's) goalPos
-    f32 goalDX = gLakituState.goalPos[0] - posX;
-    f32 goalDY = gLakituState.goalPos[1] - posY;
-    f32 goalDZ = gLakituState.goalPos[2] - posZ;
+    f32 goalDX = gLakituState->goalPos[0] - posX;
+    f32 goalDY = gLakituState->goalPos[1] - posY;
+    f32 goalDZ = gLakituState->goalPos[2] - posZ;
 
     dist = sqrtf(goalDX * goalDX + goalDY * goalDY + goalDZ * goalDZ);
     if (maxDist > dist) {
         pos[0] = posX;
         pos[1] = posY;
         pos[2] = posZ;
-        vec3f_get_dist_and_angle(gLakituState.goalPos, pos, &dist, &pitch, &yaw);
+        vec3f_get_dist_and_angle(gLakituState->goalPos, pos, &dist, &pitch, &yaw);
         if (dist < maxDist) {
-            calculate_angles(gLakituState.goalPos, gLakituState.goalFocus, &goalPitch, &goalYaw);
+            calculate_angles(gLakituState->goalPos, gLakituState->goalFocus, &goalPitch, &goalYaw);
             //! Must be same line to match on -O2
             pitch -= goalPitch; yaw -= goalYaw;
             dist -= 2000.f;
@@ -4596,10 +4596,10 @@ void rotate_in_yz(Vec3f dst, Vec3f src, s16 pitch) {
  * Start shaking the camera's pitch (up and down)
  */
 void set_camera_pitch_shake(s16 mag, s16 decay, s16 inc) {
-    if (gLakituState.shakeMagnitude[0] < mag) {
-        gLakituState.shakeMagnitude[0] = mag;
-        gLakituState.shakePitchDecay = decay;
-        gLakituState.shakePitchVel = inc;
+    if (gLakituState->shakeMagnitude[0] < mag) {
+        gLakituState->shakeMagnitude[0] = mag;
+        gLakituState->shakePitchDecay = decay;
+        gLakituState->shakePitchVel = inc;
     }
 }
 
@@ -4607,10 +4607,10 @@ void set_camera_pitch_shake(s16 mag, s16 decay, s16 inc) {
  * Start shaking the camera's yaw (side to side)
  */
 void set_camera_yaw_shake(s16 mag, s16 decay, s16 inc) {
-    if (ABS(mag) > ABS(gLakituState.shakeMagnitude[1])) {
-        gLakituState.shakeMagnitude[1] = mag;
-        gLakituState.shakeYawDecay = decay;
-        gLakituState.shakeYawVel = inc;
+    if (ABS(mag) > ABS(gLakituState->shakeMagnitude[1])) {
+        gLakituState->shakeMagnitude[1] = mag;
+        gLakituState->shakeYawDecay = decay;
+        gLakituState->shakeYawVel = inc;
     }
 }
 
@@ -4618,10 +4618,10 @@ void set_camera_yaw_shake(s16 mag, s16 decay, s16 inc) {
  * Start shaking the camera's roll (rotate screen clockwise and counterclockwise)
  */
 void set_camera_roll_shake(s16 mag, s16 decay, s16 inc) {
-    if (gLakituState.shakeMagnitude[2] < mag) {
-        gLakituState.shakeMagnitude[2] = mag;
-        gLakituState.shakeRollDecay = decay;
-        gLakituState.shakeRollVel = inc;
+    if (gLakituState->shakeMagnitude[2] < mag) {
+        gLakituState->shakeMagnitude[2] = mag;
+        gLakituState->shakeRollDecay = decay;
+        gLakituState->shakeRollVel = inc;
     }
 }
 
@@ -4637,7 +4637,7 @@ void set_pitch_shake_from_point(s16 mag, s16 decay, s16 inc, f32 maxDist, f32 po
     pos[0] = posX;
     pos[1] = posY;
     pos[2] = posZ;
-    vec3f_get_dist_and_angle(gLakituState.goalPos, pos, &dist, &dummyPitch, &dummyYaw);
+    vec3f_get_dist_and_angle(gLakituState->goalPos, pos, &dist, &dummyPitch, &dummyYaw);
     mag = reduce_by_dist_from_camera(mag, maxDist, posX, posY, posZ);
     if (mag != 0) {
         set_camera_pitch_shake(mag, decay, inc);
@@ -4656,7 +4656,7 @@ void set_yaw_shake_from_point(s16 mag, s16 decay, s16 inc, f32 maxDist, f32 posX
     pos[0] = posX;
     pos[1] = posY;
     pos[2] = posZ;
-    vec3f_get_dist_and_angle(gLakituState.goalPos, pos, &dist, &dummyPitch, &dummyYaw);
+    vec3f_get_dist_and_angle(gLakituState->goalPos, pos, &dist, &dummyPitch, &dummyYaw);
     mag = reduce_by_dist_from_camera(mag, maxDist, posX, posY, posZ);
     if (mag != 0) {
         set_camera_yaw_shake(mag, decay, inc);
@@ -4682,14 +4682,14 @@ void shake_camera_pitch(Vec3f pos, Vec3f focus) {
     s16 pitch;
     s16 yaw;
 
-    if (gLakituState.shakeMagnitude[0] | gLakituState.shakeMagnitude[1]) {
+    if (gLakituState->shakeMagnitude[0] | gLakituState->shakeMagnitude[1]) {
         vec3f_get_dist_and_angle(pos, focus, &dist, &pitch, &yaw);
-        pitch += gLakituState.shakeMagnitude[0] * sins(gLakituState.shakePitchPhase);
+        pitch += gLakituState->shakeMagnitude[0] * sins(gLakituState->shakePitchPhase);
         vec3f_set_dist_and_angle(pos, focus, dist, pitch, yaw);
-        increment_shake_offset(&gLakituState.shakePitchPhase, gLakituState.shakePitchVel);
-        if (camera_approach_s16_symmetric_bool(&gLakituState.shakeMagnitude[0], 0,
-                                               gLakituState.shakePitchDecay) == 0) {
-            gLakituState.shakePitchPhase = 0;
+        increment_shake_offset(&gLakituState->shakePitchPhase, gLakituState->shakePitchVel);
+        if (camera_approach_s16_symmetric_bool(&gLakituState->shakeMagnitude[0], 0,
+                                               gLakituState->shakePitchDecay) == 0) {
+            gLakituState->shakePitchPhase = 0;
         }
     }
 }
@@ -4702,14 +4702,14 @@ void shake_camera_yaw(Vec3f pos, Vec3f focus) {
     s16 pitch;
     s16 yaw;
 
-    if (gLakituState.shakeMagnitude[1] != 0) {
+    if (gLakituState->shakeMagnitude[1] != 0) {
         vec3f_get_dist_and_angle(pos, focus, &dist, &pitch, &yaw);
-        yaw += gLakituState.shakeMagnitude[1] * sins(gLakituState.shakeYawPhase);
+        yaw += gLakituState->shakeMagnitude[1] * sins(gLakituState->shakeYawPhase);
         vec3f_set_dist_and_angle(pos, focus, dist, pitch, yaw);
-        increment_shake_offset(&gLakituState.shakeYawPhase, gLakituState.shakeYawVel);
-        if (camera_approach_s16_symmetric_bool(&gLakituState.shakeMagnitude[1], 0,
-                                               gLakituState.shakeYawDecay) == 0) {
-            gLakituState.shakeYawPhase = 0;
+        increment_shake_offset(&gLakituState->shakeYawPhase, gLakituState->shakeYawVel);
+        if (camera_approach_s16_symmetric_bool(&gLakituState->shakeMagnitude[1], 0,
+                                               gLakituState->shakeYawDecay) == 0) {
+            gLakituState->shakeYawPhase = 0;
         }
     }
 }
@@ -4720,12 +4720,12 @@ void shake_camera_yaw(Vec3f pos, Vec3f focus) {
 void shake_camera_roll(s16 *roll) {
     UNUSED u8 unused[8];
 
-    if (gLakituState.shakeMagnitude[2] != 0) {
-        increment_shake_offset(&gLakituState.shakeRollPhase, gLakituState.shakeRollVel);
-        *roll += gLakituState.shakeMagnitude[2] * sins(gLakituState.shakeRollPhase);
-        if (camera_approach_s16_symmetric_bool(&gLakituState.shakeMagnitude[2], 0,
-                                               gLakituState.shakeRollDecay) == 0) {
-            gLakituState.shakeRollPhase = 0;
+    if (gLakituState->shakeMagnitude[2] != 0) {
+        increment_shake_offset(&gLakituState->shakeRollPhase, gLakituState->shakeRollVel);
+        *roll += gLakituState->shakeMagnitude[2] * sins(gLakituState->shakeRollPhase);
+        if (camera_approach_s16_symmetric_bool(&gLakituState->shakeMagnitude[2], 0,
+                                               gLakituState->shakeRollDecay) == 0) {
+            gLakituState->shakeRollPhase = 0;
         }
     }
 }
@@ -5258,10 +5258,10 @@ void warp_camera(f32 displacementX, f32 displacementY, f32 displacementZ) {
     displacement[0] = displacementX;
     displacement[1] = displacementY;
     displacement[2] = displacementZ;
-    vec3f_add(gLakituState.curPos, displacement);
-    vec3f_add(gLakituState.curFocus, displacement);
-    vec3f_add(gLakituState.goalPos, displacement);
-    vec3f_add(gLakituState.goalFocus, displacement);
+    vec3f_add(gLakituState->curPos, displacement);
+    vec3f_add(gLakituState->curFocus, displacement);
+    vec3f_add(gLakituState->goalPos, displacement);
+    vec3f_add(gLakituState->goalFocus, displacement);
     marioStates->waterLevel += displacementY;
 
     vec3f_add(start->focus, displacement);
@@ -5632,8 +5632,8 @@ BAD_RETURN(s32) cam_rr_exit_building_top(struct Camera *c) {
     set_camera_mode_8_directions(c);
     if (c->pos[1] < 6343.f) {
         c->pos[1] = 7543.f;
-        gLakituState.goalPos[1] = c->pos[1];
-        gLakituState.curPos[1] = c->pos[1];
+        gLakituState->goalPos[1] = c->pos[1];
+        gLakituState->curPos[1] = c->pos[1];
         sStatusFlags &= ~CAM_FLAG_SMOOTH_MOVEMENT;
     }
 }
@@ -5695,8 +5695,8 @@ void move_camera_through_floor_while_descending(struct Camera *c, f32 height) {
     if ((sMarioGeometry.currFloorHeight < height - 100.f)
         && (sMarioGeometry.prevFloorHeight > sMarioGeometry.currFloorHeight)) {
         c->pos[1] = height - 400.f;
-        gLakituState.curPos[1] = height - 400.f;
-        gLakituState.goalPos[1] = height - 400.f;
+        gLakituState->curPos[1] = height - 400.f;
+        gLakituState->goalPos[1] = height - 400.f;
     }
 }
 
@@ -5705,12 +5705,12 @@ BAD_RETURN(s32) cam_hmc_enter_maze(struct Camera *c) {
     f32 dist;
 
     if (c->pos[1] > -102.f) {
-        vec3f_get_dist_and_angle(c->focus, gLakituState.goalPos, &dist, &pitch, &yaw);
-        vec3f_set_dist_and_angle(c->focus, gLakituState.goalPos, 300.f, pitch, yaw);
-        gLakituState.goalPos[1] = -800.f;
+        vec3f_get_dist_and_angle(c->focus, gLakituState->goalPos, &dist, &pitch, &yaw);
+        vec3f_set_dist_and_angle(c->focus, gLakituState->goalPos, 300.f, pitch, yaw);
+        gLakituState->goalPos[1] = -800.f;
 #ifndef VERSION_JP
-        c->pos[1] = gLakituState.goalPos[1];
-        gLakituState.curPos[1] = gLakituState.goalPos[1];
+        c->pos[1] = gLakituState->goalPos[1];
+        gLakituState->curPos[1] = gLakituState->goalPos[1];
 #endif
         sStatusFlags &= ~CAM_FLAG_SMOOTH_MOVEMENT;
     }
@@ -5911,9 +5911,9 @@ BAD_RETURN(s32) cam_bbh_fall_into_pool(struct Camera *c) {
     Vec3f dir;
     set_camera_mode_close_cam(&c->mode);
     vec3f_set(dir, 0.f, 0.f, 300.f);
-    offset_rotated(gLakituState.goalPos, sMarioCamState->pos, dir, sMarioCamState->faceAngle);
-    gLakituState.goalPos[1] = -2300.f;
-    vec3f_copy(c->pos, gLakituState.goalPos);
+    offset_rotated(gLakituState->goalPos, sMarioCamState->pos, dir, sMarioCamState->faceAngle);
+    gLakituState->goalPos[1] = -2300.f;
+    vec3f_copy(c->pos, gLakituState->goalPos);
     sStatusFlags &= ~CAM_FLAG_SMOOTH_MOVEMENT;
 }
 
@@ -6001,7 +6001,7 @@ BAD_RETURN(s32) cam_bbh_elevator(struct Camera *c) {
     if (c->mode == CAMERA_MODE_FIXED) {
         set_camera_mode_close_cam(&c->mode);
         c->pos[1] = -405.f;
-        gLakituState.goalPos[1] = -405.f;
+        gLakituState->goalPos[1] = -405.f;
     }
 }
 
@@ -6645,7 +6645,7 @@ s16 camera_course_processing(struct Camera *c) {
 
             case AREA_DDD_WHIRLPOOL:
                 //! @bug this does nothing
-                gLakituState.defMode = CAMERA_MODE_OUTWARD_RADIAL;
+                gLakituState->defMode = CAMERA_MODE_OUTWARD_RADIAL;
                 break;
 
             case AREA_DDD_SUB:
@@ -6662,7 +6662,7 @@ s16 camera_course_processing(struct Camera *c) {
                     }
                 }
                 //! @bug this does nothing
-                gLakituState.defMode = CAMERA_MODE_FREE_ROAM;
+                gLakituState->defMode = CAMERA_MODE_FREE_ROAM;
                 break;
         }
     }
@@ -7991,7 +7991,7 @@ BAD_RETURN(s32) cutscene_key_dance_jump_lower_left(UNUSED struct Camera *c) {
  * Jump to a rotated view from above.
  */
 BAD_RETURN(s32) cutscene_key_dance_jump_above(UNUSED struct Camera *c) {
-    gLakituState.keyDanceRoll = 0x2800;
+    gLakituState->keyDanceRoll = 0x2800;
     vec3f_set(sCutsceneVars[8].point, 89.f, 373.f, -304.f);
     vec3f_set(sCutsceneVars[7].point, 0.f, 127.f, 0.f);
 }
@@ -8000,7 +8000,7 @@ BAD_RETURN(s32) cutscene_key_dance_jump_above(UNUSED struct Camera *c) {
  * Finally, jump to a further view, slightly to Mario's left.
  */
 BAD_RETURN(s32) cutscene_key_dance_jump_last(UNUSED struct Camera *c) {
-    gLakituState.keyDanceRoll = 0;
+    gLakituState->keyDanceRoll = 0;
     vec3f_set(sCutsceneVars[8].point, 135.f, 158.f, -673.f);
     vec3f_set(sCutsceneVars[7].point, -20.f, 135.f, -198.f);
 }
@@ -8918,7 +8918,7 @@ BAD_RETURN(s32) cutscene_dialog_start(struct Camera *c) {
     sCutsceneVars[9].point[1] += gCutsceneFocus->hitboxHeight + 200.f;
     sCutsceneVars[9].angle[1] = calculate_yaw(sCutsceneVars[8].point, sCutsceneVars[9].point);
 
-    yaw = calculate_yaw(sMarioCamState->pos, gLakituState.curPos);
+    yaw = calculate_yaw(sMarioCamState->pos, gLakituState->curPos);
     if ((yaw - sCutsceneVars[9].angle[1]) & 0x8000) {
         sCutsceneVars[9].angle[1] -= 0x6000;
     } else {
@@ -9538,8 +9538,8 @@ BAD_RETURN(s32) cutscene_intro_peach_start_to_pipe_spline(struct Camera *c) {
  */
 BAD_RETURN(s32) cutscene_intro_peach_dialog(struct Camera *c) {
     if (get_dialog_id() == -1) {
-        vec3f_copy(gLakituState.goalPos, c->pos);
-        vec3f_copy(gLakituState.goalFocus, c->focus);
+        vec3f_copy(gLakituState->goalPos, c->pos);
+        vec3f_copy(gLakituState->goalFocus, c->focus);
         sStatusFlags |= (CAM_FLAG_SMOOTH_MOVEMENT | CAM_FLAG_UNUSED_CUTSCENE_ACTIVE);
         gCutsceneTimer = CUTSCENE_STOP;
         c->cutscene = 0;

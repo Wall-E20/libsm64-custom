@@ -79,10 +79,13 @@ static struct Area *allocate_area( void )
     result->flags = 1;
     result->camera = malloc( sizeof( struct Camera ));
     memset( result->camera, 0, sizeof( struct Camera ));
-
     return result;
 }
-
+static struct LakituState *allocate_lakitu(void)
+{
+    struct LakituState *Lakitu = malloc( sizeof( struct LakituState ));
+    return Lakitu;
+}
 static void free_area( struct Area *area )
 {
     free( area->camera );
@@ -193,7 +196,6 @@ SM64_LIB_FN int32_t sm64_mario_create( float x, float y, float z )
     gMarioObject = hack_allocate_mario();
     gCurrentArea = allocate_area();
     gCurrentObject = gMarioObject;
-
     gMarioSpawnInfoVal.startPos[0] = x;
     gMarioSpawnInfoVal.startPos[1] = y;
     gMarioSpawnInfoVal.startPos[2] = z;
@@ -299,9 +301,9 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     outState->particleFlags = gMarioState->particleFlags;
     outState->invincTimer = gMarioState->invincTimer;
 
-    vec3f_copy(outState->camPos,gCurGraphNodeCamera->config.camera->pos);
-    vec3f_copy(outState->camFocus,gCurGraphNodeCamera->config.camera->focus);
-
+    vec3f_copy(outState->camPos, gLakituState->pos);
+    vec3f_copy(outState->camFocus, gLakituState->focus);
+    
     
     gMarioState->marioBodyState->capState = outState->capState;
     gMarioState->marioBodyState->eyeState = outState->eyeState;
@@ -312,7 +314,7 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     //gMarioState->marioBodyState->punchState = outState->punchState;
 
     //vec3s_copy(gMarioState->marioBodyState->torsoAngle, outState->torsoAngle);
-    vec3s_copy(gMarioState->marioBodyState->headAngle, outState->headAngle);
+    //vec3s_copy(gMarioState->marioBodyState->headAngle, outState->headAngle);
     vec3f_copy(gMarioState->marioBodyState->heldObjLastPosition, outState->heldObjLastPosition);
 
     gMarioState->marioBodyState->lodsOverride = outState->lodsOverride;
