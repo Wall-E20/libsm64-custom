@@ -269,12 +269,12 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     
     gfx_adapter_bind_output_buffers( outBuffers );
 
-    //float camLookX = inputs->camLookX;
-    //float camLookZ = inputs->camLookZ;
+    float camLookX = inputs->camLookX;
+    float camLookZ = inputs->camLookZ;
     // if using custom camera
-    //camLookX = gMarioState->pos[0]-gCamera->pos[0];
-    //camLookZ = gMarioState->pos[2]-gCamera->pos[2];
-    //gMarioState->area->camera->yaw=atan2s( camLookZ, camLookX );
+    camLookX = gMarioState->pos[0]-gCamera->pos[0];
+    camLookZ = gMarioState->pos[2]-gCamera->pos[2];
+    gMarioState->area->camera->yaw=atan2s( camLookZ, camLookX );
 
 
     geo_process_root_hack_single_node( s_mario_graph_node );

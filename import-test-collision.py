@@ -3,8 +3,8 @@ import os
 import shutil
 import urllib.request
 
-BOB_COLLISION_URL = "https://raw.githubusercontent.com/n64decomp/sm64/06ec56df7f951f88da05f468cdcacecba496145a/levels/bob/areas/1/collision.inc.c"
-
+#BOB_COLLISION_URL = "https://raw.githubusercontent.com/n64decomp/sm64/06ec56df7f951f88da05f468cdcacecba496145a/levels/bob/areas/1/collision.inc.c"
+BOB_COLLISION_URL = "https://raw.githubusercontent.com/n64decomp/sm64/refs/heads/master/levels/ccm/areas/1/collision.inc.c"
 LEVEL_H = """#pragma once
 
 #include "../src/libsm64.h"

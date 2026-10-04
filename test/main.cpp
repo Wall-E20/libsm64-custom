@@ -60,7 +60,7 @@ float lerp(float a, float b, float amount)
 int main( void )
 {
     size_t romSize;
-
+    
     uint8_t *rom = utils_read_file_alloc( "baserom.us.z64", &romSize );
 
     if( rom == NULL )
@@ -75,7 +75,7 @@ int main( void )
     sm64_global_init( rom, texture );
     sm64_audio_init(rom);
     sm64_static_surfaces_load( surfaces, surfaces_count );
-    int32_t marioId = sm64_mario_create( 0, 1000, 0 );
+    int32_t marioId = sm64_mario_create( 0, 7000, 0 );
     sm64_set_mario_action(marioId, 0x0000192A);
     
     free( rom );
@@ -115,10 +115,10 @@ int main( void )
 
     float tick = 0;
     uint32_t lastTicks = SDL_GetTicks();
-
+    int cameramode = 0x01;
     audio_init();
-    //sm64_set_camera_mode(0x04, 0);
-    sm64_play_music(0, 0x03 | 0x80, 0); // from decomp/include/seq_ids.h: SEQ_LEVEL_WATER | SEQ_VARIATION
+    sm64_set_camera_mode(cameramode, 0);
+    sm64_play_music(0, 0x08 | 0x80, 0); // from decomp/include/seq_ids.h: SEQ_LEVEL_WATER | SEQ_VARIATION
 
     do
     {
@@ -207,9 +207,13 @@ int main( void )
         }
             if (state[SDL_SCANCODE_R]){
                 sm64_set_mario_action(marioId, 0x0100088C);
+                sm64_set_camera_mode(cameramode, 0);
             }
             if (state[SDL_SCANCODE_T]){
                 sm64_set_mario_action(marioId, 0x00001302);
+            }
+            if (state[SDL_SCANCODE_C]){
+                sm64_mario_interact_cap(marioId,0x00000008, 1000, 1);
             }
         //cameraRot += x0_axis * dt * 2;
         //cameraPos[0] = marioState.camPos[0] + 1000.0f * cosf( cameraRot );
@@ -218,11 +222,11 @@ int main( void )
 
         marioInputs.camLookX = marioState.position[0] - cameraPos[0];
         marioInputs.camLookZ = marioState.position[2] - cameraPos[2];
-        marioInputs.stickX = -x_axis;
-        marioInputs.stickY = -y_axis;
+        marioInputs.stickX = x_axis;
+        marioInputs.stickY = y_axis;
         marioState.lodState = 2;
         marioState.lodsOverride = 1;
-        //sm64_set_mario_water_level(marioId, 300);
+        sm64_set_mario_water_level(marioId, -4610);
         while (tick >= 1.f/60)
         {   
             memcpy(lastPos, currPos, sizeof(currPos));
