@@ -81,11 +81,6 @@ static struct Area *allocate_area( void )
     memset( result->camera, 0, sizeof( struct Camera ));
     return result;
 }
-static struct LakituState *allocate_lakitu(void)
-{
-    struct LakituState *Lakitu = malloc( sizeof( struct LakituState ));
-    return Lakitu;
-}
 static void free_area( struct Area *area )
 {
     free( area->camera );
