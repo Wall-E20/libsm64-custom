@@ -1528,13 +1528,13 @@ void update_mario_health(struct MarioState *m) {
  */
 void update_mario_info_for_cam(struct MarioState *m) {
     m->marioBodyState->action = m->action;
-//  m->statusForCamera->action = m->action;
+    m->statusForCamera->action = m->action;
 
-//  vec3s_copy(m->statusForCamera->faceAngle, m->faceAngle);
+    vec3s_copy(m->statusForCamera->faceAngle, m->faceAngle);
 
-//  if (!(m->flags & MARIO_UNKNOWN_25)) {
-//      vec3f_copy(m->statusForCamera->pos, m->pos);
-//  }
+    if (!(m->flags & MARIO_UNKNOWN_25)) {
+        vec3f_copy(m->statusForCamera->pos, m->pos);
+    }
 }
 
 /**
@@ -1543,11 +1543,13 @@ void update_mario_info_for_cam(struct MarioState *m) {
 void mario_reset_bodystate(struct MarioState *m) {
     struct MarioBodyState *bodyState = m->marioBodyState;
 
-    bodyState->capState = MARIO_HAS_DEFAULT_CAP_OFF;
-    bodyState->eyeState = MARIO_EYES_BLINK;
-    bodyState->handState = MARIO_HAND_FISTS;
-    bodyState->modelState = 0;
-    bodyState->wingFlutter = FALSE;
+    m->marioBodyState->capState = MARIO_HAS_DEFAULT_CAP_OFF;
+    m->marioBodyState->eyeState = MARIO_EYES_BLINK;
+    m->marioBodyState->handState = MARIO_HAND_FISTS;
+    m->marioBodyState->modelState = 0;
+    m->marioBodyState->wingFlutter = FALSE;
+    m->marioBodyState->lodsOverride = FALSE;
+    m->marioBodyState->lodState = 0;
 
     m->flags &= ~MARIO_METAL_SHOCK;
 }
@@ -1714,7 +1716,7 @@ s32 execute_mario_action(UNUSED struct Object *o) {
 
     if (gMarioState->action) {
         gMarioState->marioObj->header.gfx.node.flags &= ~GRAPH_RENDER_INVISIBLE;
-        mario_reset_bodystate(gMarioState);
+        //mario_reset_bodystate(gMarioState);
         update_mario_inputs(gMarioState);
         mario_handle_special_floors(gMarioState);
         mario_process_interactions(gMarioState);
@@ -1896,7 +1898,7 @@ void init_mario_from_save_file(void) {
     gMarioState->flags = 0;
     gMarioState->action = 0;
     gMarioState->spawnInfo = gMarioSpawnInfo;
-//  gMarioState->statusForCamera = &gPlayerCameraState;
+    gMarioState->statusForCamera = &gPlayerCameraState[0];
     gMarioState->marioBodyState = &g_state->mgBodyStates[0];
     gMarioState->controller = &gController;
     gMarioState->animation = &D_80339D10;

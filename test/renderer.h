@@ -59,7 +59,7 @@ RenderState;
 struct Renderer
 {
 	void (*init)(RenderState *renderState, uint8_t *marioTexture);
-	void (*draw)(RenderState *renderState, const vec3 camPos, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo);
+	void (*draw)(RenderState *renderState, const vec3 camPos, const vec3 camFocus, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo);
 };
 
 #endif

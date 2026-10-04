@@ -37,6 +37,7 @@
 #include "load_tex_data.h"
 #include "obj_pool.h"
 #include "fake_interaction.h"
+#include "decomp/game/camera.h"
 
 static struct AllocOnlyPool *s_mario_geo_pool = NULL;
 static struct GraphNode *s_mario_graph_node = NULL;
@@ -44,10 +45,13 @@ static struct GraphNode *s_mario_graph_node = NULL;
 static bool s_init_global = false;
 static bool s_init_one_mario = false;
 
+//static s16 camStatus=0;
+
 struct MarioInstance
 {
     struct GlobalState *globalState;
 };
+
 struct ObjPool s_mario_instance_pool = { 0, 0 };
 
 static void update_button( bool on, u16 button )
@@ -84,6 +88,7 @@ static void free_area( struct Area *area )
     free( area->camera );
     free( area );
 }
+
 
 typedef void (*SM64DebugPrintFunctionPtr)( const char * );
 SM64_LIB_FN void sm64_register_debug_print_function( SM64DebugPrintFunctionPtr debugPrintFunction )
@@ -215,6 +220,18 @@ SM64_LIB_FN int32_t sm64_mario_create( float x, float y, float z )
     set_mario_action( gMarioState, ACT_SPAWN_SPIN_AIRBORNE, 0);
     find_floor( x, y, z, &gMarioState->floor );
 
+    if (gCurGraphNodeCamera == NULL){
+        gCurGraphNodeCamera = malloc(sizeof(struct GraphNodeCamera));
+        vec3f_copy(gCurGraphNodeCamera->pos,gMarioState->marioObj->header.gfx.pos);
+        vec3f_copy(gCurGraphNodeCamera->focus,gMarioState->marioObj->header.gfx.pos);
+        create_camera(gCurGraphNodeCamera, gCurrentArea->camera);
+        init_camera(gCurGraphNodeCamera->config.camera);
+        gCurGraphNodeCamera->config.camera->mode = CAMERA_MODE_FREE_ROAM;
+        gCurrentArea->camera = gCurGraphNodeCamera->config.camera;
+    }
+
+
+
     return marioIndex;
 }
 
@@ -231,12 +248,14 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     update_button( inputs->buttonA, A_BUTTON );
     update_button( inputs->buttonB, B_BUTTON );
     update_button( inputs->buttonZ, Z_TRIG );
-
+    update_button( inputs->buttonU, U_CBUTTONS );
+    update_button( inputs->buttonD, D_CBUTTONS );
+    update_button( inputs->buttonL, L_CBUTTONS );
+    update_button( inputs->buttonR, R_CBUTTONS );
     gMarioState->marioObj->header.gfx.cameraToObject[0] = 0;
     gMarioState->marioObj->header.gfx.cameraToObject[1] = 0;
     gMarioState->marioObj->header.gfx.cameraToObject[2] = 0;
 
-    gMarioState->area->camera->yaw = atan2s( inputs->camLookZ, inputs->camLookX );
 
     gController.stickX = -64.0f * inputs->stickX;
     gController.stickY = 64.0f * inputs->stickY;
@@ -245,8 +264,21 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     apply_mario_platform_displacement();
     bhv_mario_update();
     update_mario_platform(); // TODO platform grabbed here and used next tick could be a use-after-free
+    
 
+    update_lakitu(gCurGraphNodeCamera->config.camera);
+    update_camera(gCurGraphNodeCamera->config.camera);
+    update_graph_node_camera(gCurGraphNodeCamera);
+    
     gfx_adapter_bind_output_buffers( outBuffers );
+
+    //float camLookX = inputs->camLookX;
+    //float camLookZ = inputs->camLookZ;
+    // if using custom camera
+    //camLookX = gMarioState->pos[0]-gCamera->pos[0];
+    //camLookZ = gMarioState->pos[2]-gCamera->pos[2];
+    //gMarioState->area->camera->yaw=atan2s( camLookZ, camLookX );
+
 
     geo_process_root_hack_single_node( s_mario_graph_node );
 
@@ -266,6 +298,27 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     outState->flags = gMarioState->flags;
     outState->particleFlags = gMarioState->particleFlags;
     outState->invincTimer = gMarioState->invincTimer;
+
+    vec3f_copy(outState->camPos,gCurGraphNodeCamera->config.camera->pos);
+    vec3f_copy(outState->camFocus,gCurGraphNodeCamera->config.camera->focus);
+
+    
+    gMarioState->marioBodyState->capState = outState->capState;
+    gMarioState->marioBodyState->eyeState = outState->eyeState;
+    gMarioState->marioBodyState->handState = outState->handState;
+    gMarioState->marioBodyState->wingFlutter = outState->wingFlutter;
+    gMarioState->marioBodyState->modelState = outState->modelState;
+    gMarioState->marioBodyState->grabPos = outState->grabPos;
+    //gMarioState->marioBodyState->punchState = outState->punchState;
+
+    //vec3s_copy(gMarioState->marioBodyState->torsoAngle, outState->torsoAngle);
+    vec3s_copy(gMarioState->marioBodyState->headAngle, outState->headAngle);
+    vec3f_copy(gMarioState->marioBodyState->heldObjLastPosition, outState->heldObjLastPosition);
+
+    gMarioState->marioBodyState->lodsOverride = outState->lodsOverride;
+    gMarioState->marioBodyState->lodState = outState->lodState;
+
+
 }
 
 SM64_LIB_FN void sm64_mario_delete( int32_t marioId )
@@ -618,6 +671,7 @@ SM64_LIB_FN bool sm64_mario_attack(int32_t marioId, float x, float y, float z, f
     return fake_interact_bounce_top(gMarioState, x, y, z, hitboxHeight);
 }
 
+
 SM64_LIB_FN uint32_t sm64_surface_object_create( const struct SM64SurfaceObject *surfaceObject )
 {
     uint32_t id = surfaces_load_object( surfaceObject );
@@ -724,4 +778,8 @@ SM64_LIB_FN void sm64_play_sound_global(int32_t soundBits)
 SM64_LIB_FN void sm64_set_sound_volume(float vol)
 {
     gAudioVolume = vol;
+}
+SM64_LIB_FN void sm64_set_camera_mode(uint16_t mode, uint16_t nframes)
+{
+    set_camera_mode(gCurrentArea->camera, mode, nframes);
 }

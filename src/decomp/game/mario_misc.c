@@ -357,6 +357,28 @@ Gfx *geo_switch_mario_stand_run(s32 callContext, struct GraphNode *node, UNUSED 
     return NULL;
 }
 
+
+Gfx *geo_switch_mario_level_of_detail(s32 callContext, struct GraphNode *node, UNUSED Mat4 *mtx) {
+    struct GraphNodeSwitchCase *switchCase = (struct GraphNodeSwitchCase *) node;
+    struct MarioBodyState *bodyState = &gBodyStates[switchCase->numCases];
+
+    if (callContext == GEO_CONTEXT_RENDER) {
+        if (!bodyState->lodsOverride)
+        {
+            if ((bodyState->action & ACT_FLAG_STATIONARY) == 0){
+                switchCase->selectedCase = bodyState->lodState;
+            }else
+            {
+                switchCase->selectedCase = 0;
+            }
+        }else{
+            switchCase->selectedCase = bodyState->lodState;
+        }
+    }
+    return NULL;
+}
+
+
 /**
  * Geo node script that makes Mario blink
  */
@@ -408,23 +430,23 @@ Gfx *geo_mario_tilt_torso(s32 callContext, struct GraphNode *node, UNUSED Mat4 *
 Gfx *geo_mario_head_rotation(s32 callContext, struct GraphNode *node, UNUSED Mat4 *c) {
     struct GraphNodeGenerated *asGenerated = (struct GraphNodeGenerated *) node;
     struct MarioBodyState *bodyState = &gBodyStates[asGenerated->parameter];
-    // s32 action = bodyState->action;
+    s32 action = bodyState->action;
 
     if (callContext == GEO_CONTEXT_RENDER) {
         struct GraphNodeRotation *rotNode = (struct GraphNodeRotation *) node->next;
-    //  struct Camera *camera = gCurGraphNodeCamera->config.camera;
+      struct Camera *camera = gCurGraphNodeCamera->config.camera;
 
-    //  if (camera->mode == CAMERA_MODE_C_UP) {
-    //      rotNode->rotation[0] = 0; // gPlayerCameraState->headRotation[1]; // PATCH
-    //      rotNode->rotation[2] = 0; // gPlayerCameraState->headRotation[0];
-    //  } else if (action & ACT_FLAG_WATER_OR_TEXT) {
-    //      rotNode->rotation[0] = bodyState->headAngle[1];
-    //      rotNode->rotation[1] = bodyState->headAngle[2];
-    //      rotNode->rotation[2] = bodyState->headAngle[0];
-    //  } else {
+      if (camera->mode == CAMERA_MODE_C_UP) {
+          rotNode->rotation[0] = 0; // gPlayerCameraState->headRotation[1]; // PATCH
+          rotNode->rotation[2] = 0; // gPlayerCameraState->headRotation[0];
+      } else if (action & ACT_FLAG_WATER_OR_TEXT) {
+          rotNode->rotation[0] = bodyState->headAngle[1];
+          rotNode->rotation[1] = bodyState->headAngle[2];
+          rotNode->rotation[2] = bodyState->headAngle[0];
+      } else {
             vec3s_set(bodyState->headAngle, 0, 0, 0);
             vec3s_set(rotNode->rotation, 0, 0, 0);
-    //  }
+      }
     }
     return NULL;
 }

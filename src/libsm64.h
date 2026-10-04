@@ -36,8 +36,9 @@ struct SM64Surface
 struct SM64MarioInputs
 {
     float camLookX, camLookZ;
+    
     float stickX, stickY;
-    uint8_t buttonA, buttonB, buttonZ;
+    uint8_t buttonA, buttonB, buttonZ, buttonL, buttonR, buttonU, buttonD;
 };
 
 struct SM64ObjectTransform
@@ -66,7 +67,25 @@ struct SM64MarioState
     uint32_t flags;
     uint32_t particleFlags;
     int16_t invincTimer;
+
+    float camPos[3];
+    float camFocus[3];
+
+    /*0x04*/ int8_t capState; /// see MarioCapGSCId
+    /*0x05*/ int8_t eyeState;
+    /*0x06*/ int8_t handState;
+    /*0x07*/ int8_t wingFlutter; /// whether Mario's wing cap wings are fluttering
+    /*0x08*/ int16_t modelState;
+    /*0x0A*/ int8_t grabPos;
+    /*0x0B*/ uint8_t punchState; /// 2 bits for type of punch, 6 bits for punch animation timer
+    /*0x0C*/ int16_t torsoAngle[3];
+    /*0x12*/ int16_t headAngle[3];
+    /*0x18*/ float heldObjLastPosition[3]; /// also known as HOLP
+    int8_t lodsOverride; //libsm64-custom added
+    int8_t lodState; //libsm64-custom added
 };
+
+
 
 struct SM64MarioGeometryBuffers
 {
@@ -201,6 +220,7 @@ extern SM64_LIB_FN uint16_t sm64_get_current_background_music();
 extern SM64_LIB_FN void sm64_play_sound(int32_t soundBits, float *pos);
 extern SM64_LIB_FN void sm64_play_sound_global(int32_t soundBits);
 extern SM64_LIB_FN void sm64_set_sound_volume(float vol);
+extern SM64_LIB_FN void sm64_set_camera_mode(uint16_t mode, uint16_t nframes);
 
 #ifdef __cplusplus
 }

@@ -51,11 +51,12 @@ static float read_axis( int16_t val )
     return result > 0.0f ? (result - 0.2f) / 0.8f : (result + 0.2f) / 0.8f;
 }
 
+/*
 float lerp(float a, float b, float amount)
 {
     return a + (b - a) * amount;
 }
-
+*/
 int main( void )
 {
     size_t romSize;
@@ -75,7 +76,7 @@ int main( void )
     sm64_audio_init(rom);
     sm64_static_surfaces_load( surfaces, surfaces_count );
     int32_t marioId = sm64_mario_create( 0, 1000, 0 );
-
+    
     free( rom );
 
     RenderState renderState;
@@ -115,8 +116,8 @@ int main( void )
     uint32_t lastTicks = SDL_GetTicks();
 
     audio_init();
-
-    sm64_play_music(0, 0x05 | 0x80, 0); // from decomp/include/seq_ids.h: SEQ_LEVEL_WATER | SEQ_VARIATION
+    //sm64_set_camera_mode(0x04, 0);
+    sm64_play_music(0, 0x03 | 0x80, 0); // from decomp/include/seq_ids.h: SEQ_LEVEL_WATER | SEQ_VARIATION
 
     do
     {
@@ -130,50 +131,51 @@ int main( void )
         if (!controller) // keyboard
         {
             const Uint8* state = SDL_GetKeyboardState(NULL);
-
+            
             float dir;
             float spd = 0;
-            if (state[SDL_SCANCODE_UP] && state[SDL_SCANCODE_RIGHT])
+            
+            if (state[SDL_SCANCODE_W] && state[SDL_SCANCODE_D])
             {
                 dir = -M_PI * 0.25f;
                 spd = 1;
             }
-            else if (state[SDL_SCANCODE_UP] && state[SDL_SCANCODE_LEFT])
+            else if (state[SDL_SCANCODE_W] && state[SDL_SCANCODE_A])
             {
                 dir = -M_PI * 0.75f;
                 spd = 1;
             }
-            else if (state[SDL_SCANCODE_DOWN] && state[SDL_SCANCODE_RIGHT])
+            else if (state[SDL_SCANCODE_S] && state[SDL_SCANCODE_D])
             {
                 dir = M_PI * 0.25f;
                 spd = 1;
             }
-            else if (state[SDL_SCANCODE_DOWN] && state[SDL_SCANCODE_LEFT])
+            else if (state[SDL_SCANCODE_S] && state[SDL_SCANCODE_A])
             {
                 dir = M_PI * 0.75f;
                 spd = 1;
             }
-            else if (state[SDL_SCANCODE_UP])
+            else if (state[SDL_SCANCODE_W])
             {
                 dir = -M_PI * 0.5f;
                 spd = 1;
             }
-            else if (state[SDL_SCANCODE_DOWN])
+            else if (state[SDL_SCANCODE_S])
             {
                 dir = M_PI * 0.5f;
                 spd = 1;
             }
-            else if (state[SDL_SCANCODE_LEFT])
+            else if (state[SDL_SCANCODE_A])
             {
                 dir = M_PI;
                 spd = 1;
             }
-            else if (state[SDL_SCANCODE_RIGHT])
+            else if (state[SDL_SCANCODE_D])
             {
                 dir = 0;
                 spd = 1;
             }
-
+            
             x_axis = cosf(dir) * spd;
             y_axis = sinf(dir) * spd;
             x0_axis = state[SDL_SCANCODE_LSHIFT] ? 1 : state[SDL_SCANCODE_RSHIFT] ? -1 : 0;
@@ -181,6 +183,10 @@ int main( void )
             marioInputs.buttonA = state[SDL_SCANCODE_X];
             marioInputs.buttonB = state[SDL_SCANCODE_C];
             marioInputs.buttonZ = state[SDL_SCANCODE_Z];
+            marioInputs.buttonL = state[SDL_SCANCODE_LEFT];
+            marioInputs.buttonR = state[SDL_SCANCODE_RIGHT];
+            marioInputs.buttonU = state[SDL_SCANCODE_UP];
+            marioInputs.buttonD = state[SDL_SCANCODE_DOWN];
         }
         else
         {
@@ -191,34 +197,41 @@ int main( void )
             marioInputs.buttonA = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_A );
             marioInputs.buttonB = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_X );
             marioInputs.buttonZ = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER );
+            marioInputs.buttonL = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT );
+            marioInputs.buttonR = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT );
+            marioInputs.buttonU = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_UP );
+            marioInputs.buttonD = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN );
         }
 
-        cameraRot += x0_axis * dt * 2;
-        cameraPos[0] = marioState.position[0] + 1000.0f * cosf( cameraRot );
-        cameraPos[1] = marioState.position[1] + 200.0f;
-        cameraPos[2] = marioState.position[2] + 1000.0f * sinf( cameraRot );
+        //cameraRot += x0_axis * dt * 2;
+        //cameraPos[0] = marioState.camPos[0] + 1000.0f * cosf( cameraRot );
+        //cameraPos[1] = marioState.camPos[1] + 200.0f;
+        //cameraPos[2] = marioState.camPos[2] + 1000.0f * sinf( cameraRot );
 
         marioInputs.camLookX = marioState.position[0] - cameraPos[0];
         marioInputs.camLookZ = marioState.position[2] - cameraPos[2];
-        marioInputs.stickX = x_axis;
-        marioInputs.stickY = y_axis;
-
-        while (tick >= 1.f/30)
+        marioInputs.stickX = -x_axis;
+        marioInputs.stickY = -y_axis;
+        marioState.lodState = 0x02;
+        marioState.lodsOverride = 0;
+        while (tick >= 1.f/60)
         {
             memcpy(lastPos, currPos, sizeof(currPos));
             memcpy(lastGeoPos, currGeoPos, sizeof(currGeoPos));
 
             tick -= 1.f/30;
+
             sm64_mario_tick( marioId, &marioInputs, &marioState, &marioGeometry );
 
             memcpy(currPos, marioState.position, sizeof(currPos));
             memcpy(currGeoPos, marioGeometry.position, sizeof(currGeoPos));
+
         }
 
         for (int i=0; i<3; i++) marioState.position[i] = lerp(lastPos[i], currPos[i], tick / (1.f/30));
         for (int i=0; i<marioGeometry.numTrianglesUsed*9; i++) marioGeometry.position[i] = lerp(lastGeoPos[i], currGeoPos[i], tick / (1.f/30));
 
-        renderer->draw( &renderState, cameraPos, &marioState, &marioGeometry );
+        renderer->draw( &renderState, marioState.camPos, marioState.camFocus, &marioState, &marioGeometry );
     }
     while( context_flip_frame_poll_events() );
 
