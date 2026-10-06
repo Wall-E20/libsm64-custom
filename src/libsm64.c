@@ -217,15 +217,14 @@ SM64_LIB_FN int32_t sm64_mario_create( float x, float y, float z )
     set_mario_action( gMarioState, ACT_SPAWN_SPIN_AIRBORNE, 0);
     find_floor( x, y, z, &gMarioState->floor );
 
-    if (gCurGraphNodeCamera == NULL){
-        gCurGraphNodeCamera = malloc(sizeof(struct GraphNodeCamera));
-        vec3f_copy(gCurGraphNodeCamera->pos,gMarioState->marioObj->header.gfx.pos);
-        vec3f_copy(gCurGraphNodeCamera->focus,gMarioState->marioObj->header.gfx.pos);
-        create_camera(gCurGraphNodeCamera, gCurrentArea->camera);
-        init_camera(gCurGraphNodeCamera->config.camera);
-        gCurGraphNodeCamera->config.camera->mode = CAMERA_MODE_FREE_ROAM;
-        gCurrentArea->camera = gCurGraphNodeCamera->config.camera;
-    }
+    gCurGraphNodeCamera = malloc(sizeof(struct GraphNodeCamera));
+    vec3f_copy(gCurGraphNodeCamera->pos,gMarioState->marioObj->header.gfx.pos);
+    vec3f_copy(gCurGraphNodeCamera->focus,gMarioState->marioObj->header.gfx.pos);
+    create_camera(gCurGraphNodeCamera, gCurrentArea->camera);
+    init_camera(gCurGraphNodeCamera->config.camera);
+    gCurGraphNodeCamera->config.camera->mode = CAMERA_MODE_FREE_ROAM;
+    gCurrentArea->camera = gCurGraphNodeCamera->config.camera;
+    
 
 
 
@@ -779,4 +778,8 @@ SM64_LIB_FN void sm64_set_sound_volume(float vol)
 SM64_LIB_FN void sm64_set_camera_mode(uint16_t mode, uint16_t nframes)
 {
     set_camera_mode(gCurrentArea->camera, mode, nframes);
+}
+SM64_LIB_FN uint8_t sm64_get_camera_mode(uint16_t mode, uint16_t nframes)
+{
+    return gCurrentArea->camera->mode;
 }

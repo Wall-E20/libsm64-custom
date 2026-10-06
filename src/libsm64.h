@@ -221,7 +221,7 @@ extern SM64_LIB_FN void sm64_play_sound(int32_t soundBits, float *pos);
 extern SM64_LIB_FN void sm64_play_sound_global(int32_t soundBits);
 extern SM64_LIB_FN void sm64_set_sound_volume(float vol);
 extern SM64_LIB_FN void sm64_set_camera_mode(uint16_t mode, uint16_t nframes);
-
+extern SM64_LIB_FN uint8_t sm64_get_camera_mode(uint16_t mode, uint16_t nframes);
 #ifdef __cplusplus
 }
 #endif

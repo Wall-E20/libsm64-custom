@@ -157,7 +157,7 @@ extern struct ParallelTrackingPoint *sParTrackPath;
 extern struct CameraStoredInfo sParTrackTransOff;
 extern struct CameraStoredInfo sCameraStoreCUp;
 extern struct CameraStoredInfo sCameraStoreCutscene;
-extern s16 gCameraMovementFlags;
+//extern s16 gCameraMovementFlags;
 extern s16 sStatusFlags;
 extern struct CutsceneSplinePoint sCurCreditsSplinePos[32];
 extern struct CutsceneSplinePoint sCurCreditsSplineFocus[32];
@@ -238,7 +238,7 @@ s16 sSelectionFlags;
 /**
  * Flags that determine what movements the camera should start / do this frame.
  */
-s16 gCameraMovementFlags;
+//s16 gCameraMovementFlags;
 s16 unused8033B316;
 
 /**

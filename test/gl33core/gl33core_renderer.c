@@ -278,14 +278,14 @@ static void gl33core_init(RenderState *renderState, uint8_t *marioTexture)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SM64_TEXTURE_WIDTH, SM64_TEXTURE_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, marioTexture);
 }
 
-static void gl33core_draw(RenderState *renderState, const vec3 camPos, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo)
+static void gl33core_draw(RenderState *renderState, const vec3 camPos, const vec3 camFocus, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo)
 {
 	update_mario_mesh( &renderState->mario, marioGeo );
 
 	mat4 model, view, projection;
 	glm_perspective( 45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 100.0f, 20000.0f, projection );
 	glm_translate( view, (float*)camPos );
-	glm_lookat( (float*)camPos, (float*)marioState->position, (vec3){0,1,0}, view );
+	glm_lookat( (float*)camPos, (float*)camFocus, (vec3){0,1,0}, view );
 	glm_mat4_identity( model );
 
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
