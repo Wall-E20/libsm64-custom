@@ -138,6 +138,9 @@ SM64_LIB_FN void sm64_global_terminate( void )
         s_mario_geo_pool = NULL;
     }
 
+    free( gCurGraphNodeCamera );
+
+
     surfaces_unload_all();
     unload_mario_anims();
     memory_terminate();
