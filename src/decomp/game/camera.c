@@ -9601,7 +9601,7 @@ BAD_RETURN(s32) cutscene_intro_peach_fly_to_pipe(struct Camera *c) {
 #elif defined(VERSION_EU)
     cutscene_event(play_sound_intro_turn_on_hud, c, 673, 673);
 #endif
-    cutscene_spawn_obj(6, 1);
+    //cutscene_spawn_obj(6, 1);
     cutscene_event(cutscene_intro_peach_start_flying_music, c, 0, 0);
     cutscene_event(cutscene_intro_peach_start_to_pipe_spline, c, 0, -1);
 #ifdef VERSION_EU
@@ -9647,7 +9647,7 @@ BAD_RETURN(s32) cutscene_intro_peach_reset_fov(UNUSED struct Camera *c) {
  * Peach reads the letter to Mario.
  */
 BAD_RETURN(s32) cutscene_intro_peach_letter(struct Camera *c) {
-    cutscene_spawn_obj(5, 0);
+//    cutscene_spawn_obj(5, 0);
     cutscene_event(cutscene_intro_peach_zoom_fov, c, 0, 0);
     cutscene_event(cutscene_intro_peach_start_letter_music, c, 65, 65);
 #ifdef VERSION_EU
@@ -9659,7 +9659,7 @@ BAD_RETURN(s32) cutscene_intro_peach_letter(struct Camera *c) {
     cutscene_event(play_sound_peach_reading_letter, c, 83, 83);
 #endif
 
-    if ((gCutsceneTimer > 120) && (get_dialog_id() == -1)) {
+    if ((gCutsceneTimer > 120) ){//&& (get_dialog_id() == -1)) {
         // Start the next scene
         gCutsceneTimer = CUTSCENE_LOOP;
     }

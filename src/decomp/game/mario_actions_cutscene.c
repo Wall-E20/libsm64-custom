@@ -622,56 +622,57 @@ s32 act_debug_free_move(struct MarioState *m) {
 
 void general_star_dance_handler(struct MarioState *m, s32 isInWater) {
 //  s32 dialogID;
-//  if (m->actionState == 0) {
-//      switch (++m->actionTimer) {
-//          case 1:
-//              spawn_object(m->marioObj, MODEL_STAR, bhvCelebrationStar);
+if (m->actionState == 0) {
+      switch (++m->actionTimer) {
+          case 1:
+              //spawn_object(m->marioObj, MODEL_STAR, bhvCelebrationStar);
 //              disable_background_sound();
-//              if (m->actionArg & 1) {
-//                  play_course_clear();
-//              } else {
+              if (m->actionArg & 1) {
+                  play_course_clear();
+              } else {
 //                  if (gCurrLevelNum == LEVEL_BOWSER_1 || gCurrLevelNum == LEVEL_BOWSER_2) {
 //                      play_music(SEQ_PLAYER_ENV, SEQUENCE_ARGS(15, SEQ_EVENT_CUTSCENE_COLLECT_KEY), 0);
 //                  } else {
-//                      play_music(SEQ_PLAYER_ENV, SEQUENCE_ARGS(15, SEQ_EVENT_CUTSCENE_COLLECT_STAR), 0);
+                      play_music(SEQ_PLAYER_ENV, SEQUENCE_ARGS(15, SEQ_EVENT_CUTSCENE_COLLECT_STAR), 0);
 //                  }
-//              }
-//              break;
+              }
+              break;
 
-//          case 42:
-//              play_sound(SOUND_MARIO_HERE_WE_GO, m->marioObj->header.gfx.cameraToObject);
-//              break;
+          case 42:
+              play_sound(SOUND_MARIO_HERE_WE_GO, m->marioObj->header.gfx.cameraToObject);
+              break;
 
-//          case 80:
-//              if ((m->actionArg & 1) == 0) {
+          case 80:
+              if ((m->actionArg & 1) == 0) {
 //                  level_trigger_warp(m, WARP_OP_STAR_EXIT);
-//              } else {
+              } else {
 //                  enable_time_stop();
 //                  create_dialog_box_with_response(gLastCompletedStarNum == 7 ? DIALOG_013 : DIALOG_014);
-//                  m->actionState = 1;
-//              }
-//              break;
-//      }
+                  m->actionState = 1;
+              }
+              break;
+      //}
+
 //  } else if (m->actionState == 1 && gDialogResponse) {
 //      if (gDialogResponse == 1) {
 //          save_file_do_save(gCurrSaveFileNum - 1);
-//      }
-//      m->actionState = 2;
-//  } else if (m->actionState == 2 && is_anim_at_end(m)) {
+      }
+//        m->actionState = 2;
+    } else if (m->actionState == 2 && is_anim_at_end(m)) {
 //      disable_time_stop();
 //      enable_background_sound();
 //      dialogID = get_star_collection_dialog(m);
 //      if (dialogID != 0) {
-//          // look up for dialog
+          // look up for dialog
 //          set_mario_action(m, ACT_READING_AUTOMATIC_DIALOG, dialogID);
 //      } else {
-//          set_mario_action(m, isInWater ? ACT_WATER_IDLE : ACT_IDLE, 0);
+         set_mario_action(m, isInWater ? ACT_WATER_IDLE : ACT_IDLE, 0);
 //      }
-//  }
+  }
 }
 
 s32 act_star_dance(struct MarioState *m) {
-    m->faceAngle[1] = m->area->camera->yaw;
+    m->faceAngle[1] = m->area->camera->yaw + 0x8000;
     set_mario_animation(m, m->actionState == 2 ? MARIO_ANIM_RETURN_FROM_STAR_DANCE
                                                : MARIO_ANIM_STAR_DANCE);
     general_star_dance_handler(m, 0);
@@ -683,7 +684,7 @@ s32 act_star_dance(struct MarioState *m) {
 }
 
 s32 act_star_dance_water(struct MarioState *m) {
-    m->faceAngle[1] = m->area->camera->yaw;
+    m->faceAngle[1] = m->area->camera->yaw + 0x8000;
     set_mario_animation(m, m->actionState == 2 ? MARIO_ANIM_RETURN_FROM_WATER_STAR_DANCE
                                                : MARIO_ANIM_WATER_STAR_DANCE);
     vec3f_copy(m->marioObj->header.gfx.pos, m->pos);
@@ -1694,9 +1695,9 @@ static void advance_cutscene_step(struct MarioState *m) {
 
 static void intro_cutscene_hide_hud_and_mario(struct MarioState *m) {
 //  gHudDisplay.flags = HUD_DISPLAY_NONE;
-//  m->statusForCamera->cameraEvent = CAM_EVENT_START_INTRO;
+    m->statusForCamera->cameraEvent = CAM_EVENT_START_INTRO;
 //  m->marioObj->header.gfx.node.flags &= ~GRAPH_RENDER_ACTIVE;
-//  advance_cutscene_step(m);
+    advance_cutscene_step(m);
 }
 
 #ifdef VERSION_EU
@@ -1706,14 +1707,14 @@ static void intro_cutscene_hide_hud_and_mario(struct MarioState *m) {
 #endif
 
 static void intro_cutscene_peach_lakitu_scene(struct MarioState *m) {
-//  if ((s16) m->statusForCamera->cameraEvent != CAM_EVENT_START_INTRO) {
-//      if (m->actionTimer++ == TIMER_SPAWN_PIPE) {
+  if ((s16) m->statusForCamera->cameraEvent != CAM_EVENT_START_INTRO) {
+      if (m->actionTimer++ == TIMER_SPAWN_PIPE) {
 //          sIntroWarpPipeObj =
 //              spawn_object_abs_with_rot(gCurrentObject, 0, MODEL_CASTLE_GROUNDS_WARP_PIPE,
 //                                        bhvStaticObject, -1328, 60, 4664, 0, 180, 0);
-//          advance_cutscene_step(m);
-//      }
-//  }
+          advance_cutscene_step(m);
+      }
+  }
 }
 #undef TIMER_SPAWN_PIPE
 
@@ -1726,14 +1727,14 @@ static void intro_cutscene_peach_lakitu_scene(struct MarioState *m) {
 static void intro_cutscene_raise_pipe(struct MarioState *m) {
 //  sIntroWarpPipeObj->oPosY = camera_approach_f32_symmetric(sIntroWarpPipeObj->oPosY, 260.0f, 10.0f);
 
-//  if (m->actionTimer == 0) {
-//      play_sound(SOUND_MENU_EXIT_PIPE, sIntroWarpPipeObj->header.gfx.cameraToObject);
-//  }
+  if (m->actionTimer == 0) {
+      play_sound(SOUND_MENU_EXIT_PIPE, m->pos);
+    }
 
-//  if (m->actionTimer++ == TIMER_RAISE_PIPE) {
-//      m->vel[1] = 60.0f;
-//      advance_cutscene_step(m);
-//  }
+  if (m->actionTimer++ == TIMER_RAISE_PIPE) {
+      m->vel[1] = 60.0f;
+      advance_cutscene_step(m);
+  }
 }
 #undef TIMER_RAISE_PIPE
 
@@ -1742,31 +1743,31 @@ static void intro_cutscene_jump_out_of_pipe(struct MarioState *m) {
 //        gHudDisplay.flags = HUD_DISPLAY_DEFAULT;
 //    }
 //
-//    if (m->actionTimer++ >= 118) {
+    if (m->actionTimer++ >= 118) {
 //        m->marioObj->header.gfx.node.flags |= GRAPH_RENDER_ACTIVE;
 //
-//#ifdef VERSION_EU
-//        // For some reason these calls were swapped.
-//        play_sound_if_no_flag(m, SOUND_ACTION_HIT_3, MARIO_ACTION_SOUND_PLAYED);
-//        play_sound_if_no_flag(m, SOUND_MARIO_YAHOO, MARIO_MARIO_SOUND_PLAYED);
-//#else
-//        play_sound_if_no_flag(m, SOUND_MARIO_YAHOO, MARIO_MARIO_SOUND_PLAYED);
-//    #ifndef VERSION_JP
-//        play_sound_if_no_flag(m, SOUND_ACTION_HIT_3, MARIO_ACTION_SOUND_PLAYED);
-//    #endif
-//#endif
-//
-//        set_mario_animation(m, MARIO_ANIM_SINGLE_JUMP);
-//        mario_set_forward_vel(m, 10.0f);
-//        if (perform_air_step(m, 0) == AIR_STEP_LANDED) {
+#ifdef VERSION_EU
+        // For some reason these calls were swapped.
+        play_sound_if_no_flag(m, SOUND_ACTION_HIT_3, MARIO_ACTION_SOUND_PLAYED);
+        play_sound_if_no_flag(m, SOUND_MARIO_YAHOO, MARIO_MARIO_SOUND_PLAYED);
+#else
+        play_sound_if_no_flag(m, SOUND_MARIO_YAHOO, MARIO_MARIO_SOUND_PLAYED);
+    #ifndef VERSION_JP
+        play_sound_if_no_flag(m, SOUND_ACTION_HIT_3, MARIO_ACTION_SOUND_PLAYED);
+    #endif
+#endif
+
+        set_mario_animation(m, MARIO_ANIM_SINGLE_JUMP);
+        mario_set_forward_vel(m, 10.0f);
+        if (perform_air_step(m, 0) == AIR_STEP_LANDED) {
 //            sound_banks_enable(2, 0x0330);
-//            play_mario_landing_sound(m, SOUND_ACTION_TERRAIN_LANDING);
-//#ifndef VERSION_JP
-//            play_sound(SOUND_MARIO_HAHA, m->marioObj->header.gfx.cameraToObject);
-//#endif
-//            advance_cutscene_step(m);
-//        }
-//    }
+            play_mario_landing_sound(m, SOUND_ACTION_TERRAIN_LANDING);
+#ifndef VERSION_JP
+            play_sound(SOUND_MARIO_HAHA, m->marioObj->header.gfx.cameraToObject);
+#endif
+            advance_cutscene_step(m);
+        }
+    }
 }
 
 static void intro_cutscene_land_outside_pipe(struct MarioState *m) {
@@ -1781,15 +1782,15 @@ static void intro_cutscene_land_outside_pipe(struct MarioState *m) {
 
 static void intro_cutscene_lower_pipe(struct MarioState *m) {
     if (m->actionTimer++ == 0) {
-        play_sound(SOUND_MENU_ENTER_PIPE, sIntroWarpPipeObj->header.gfx.cameraToObject);
+        play_sound(SOUND_MENU_ENTER_PIPE, m->pos);
         set_mario_animation(m, MARIO_ANIM_FIRST_PERSON);
     }
 
-    sIntroWarpPipeObj->oPosY -= 5.0f;
-    if (sIntroWarpPipeObj->oPosY <= 50.0f) {
+//    sIntroWarpPipeObj->oPosY -= 5.0f;
+//    if (sIntroWarpPipeObj->oPosY <= 50.0f) {
 //      obj_mark_for_deletion(sIntroWarpPipeObj);
         advance_cutscene_step(m);
-    }
+//    }
 
     stop_and_set_height_to_floor(m);
 }
@@ -1842,29 +1843,29 @@ static s32 act_intro_cutscene(struct MarioState *m) {
 
 // jumbo star cutscene: Mario lands after grabbing the jumbo star
 static void jumbo_star_cutscene_falling(struct MarioState *m) {
-//  if (m->actionState == 0) {
-//      m->input |= INPUT_A_DOWN;
-//      m->flags |= (MARIO_WING_CAP | MARIO_CAP_ON_HEAD);
+  if (m->actionState == 0) {
+      m->input |= INPUT_A_DOWN;
+      m->flags |= (MARIO_WING_CAP | MARIO_CAP_ON_HEAD);
 
-//      m->faceAngle[1] = -0x8000;
-//      m->pos[0] = 0.0f;
-//      m->pos[2] = 0.0f;
+      m->faceAngle[1] = -0x8000;
+      m->pos[0] = 0.0f;
+      m->pos[2] = 0.0f;
 
-//      mario_set_forward_vel(m, 0.0f);
-//      set_mario_animation(m, MARIO_ANIM_GENERAL_FALL);
+      mario_set_forward_vel(m, 0.0f);
+      set_mario_animation(m, MARIO_ANIM_GENERAL_FALL);
 
-//      if (perform_air_step(m, 1) == AIR_STEP_LANDED) {
-//          play_cutscene_music(SEQUENCE_ARGS(15, SEQ_EVENT_CUTSCENE_VICTORY));
-//          play_mario_landing_sound(m, SOUND_ACTION_TERRAIN_LANDING);
-//          m->actionState++;
-//      }
-//  } else {
-//      set_mario_animation(m, MARIO_ANIM_GENERAL_LAND);
-//      if (is_anim_at_end(m)) {
-//          m->statusForCamera->cameraEvent = CAM_EVENT_START_GRAND_STAR;
-//          advance_cutscene_step(m);
-//      }
-//  }
+      if (perform_air_step(m, 1) == AIR_STEP_LANDED) {
+          //play_cutscene_music(SEQUENCE_ARGS(15, SEQ_EVENT_CUTSCENE_VICTORY));
+          play_mario_landing_sound(m, SOUND_ACTION_TERRAIN_LANDING);
+          m->actionState++;
+      }
+  } else {
+      set_mario_animation(m, MARIO_ANIM_GENERAL_LAND);
+      if (is_anim_at_end(m)) {
+          m->statusForCamera->cameraEvent = CAM_EVENT_START_GRAND_STAR;
+          advance_cutscene_step(m);
+      }
+  }
 }
 
 // jumbo star cutscene: Mario takes off
@@ -1965,7 +1966,7 @@ static s32 jumbo_star_cutscene_flying(struct MarioState *m) {
     m->particleFlags |= PARTICLE_SPARKLES;
 
     if (m->actionTimer++ == 500) {
-        level_trigger_warp(m, WARP_OP_CREDITS_START);
+        //level_trigger_warp(m, WARP_OP_CREDITS_START);
     }
 
     return FALSE;

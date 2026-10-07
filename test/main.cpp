@@ -213,7 +213,7 @@ int main( void )
                 sm64_set_camera_mode(cameramode, 0);
             }
             if (state[SDL_SCANCODE_T]){
-                sm64_set_mario_action(marioId, 0x00001302);
+                sm64_set_mario_action(marioId, 0x04001301);
             }
             if (state[SDL_SCANCODE_C]){
                 sm64_mario_interact_cap(marioId,0x00000008, 1000, 1);
