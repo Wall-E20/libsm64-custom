@@ -75,7 +75,7 @@ int main( void )
     sm64_global_init( rom, texture );
     sm64_audio_init(rom);
     sm64_static_surfaces_load( surfaces, surfaces_count );
-    int32_t marioId = sm64_mario_create( 0, 7000, 0 );
+    int32_t marioId = sm64_mario_create( 300, 7000, 100 );
     sm64_set_mario_action(marioId, 0x0000192A);
     
     free( rom );
@@ -120,6 +120,9 @@ int main( void )
     sm64_set_camera_mode(cameramode, 0);
     sm64_play_music(0, 0x08 | 0x80, 0); // from decomp/include/seq_ids.h: SEQ_LEVEL_WATER | SEQ_VARIATION
 
+    marioState.lodState = 1;
+    marioState.lodsOverride = 1;
+    sm64_set_mario_water_level(marioId, -4610);
     do
     {
         float dt = (SDL_GetTicks() - lastTicks) / 1000.f;
@@ -215,19 +218,20 @@ int main( void )
             if (state[SDL_SCANCODE_C]){
                 sm64_mario_interact_cap(marioId,0x00000008, 1000, 1);
             }
-        //cameraRot += x0_axis * dt * 2;
-        //cameraPos[0] = marioState.camPos[0] + 1000.0f * cosf( cameraRot );
-        //cameraPos[1] = marioState.camPos[1] + 200.0f;
-        //cameraPos[2] = marioState.camPos[2] + 1000.0f * sinf( cameraRot );
+        cameraRot += x0_axis * dt * 2;
+        cameraPos[0] = marioState.position[0] + 1000.0f * cosf( cameraRot );
+        cameraPos[1] = marioState.position[1] + 200.0f;
+        cameraPos[2] = marioState.position[2] + 1000.0f * sinf( cameraRot );
+        
+        vec3 refcam;
 
-        marioInputs.camLookX = marioState.position[0] - cameraPos[0];
-        marioInputs.camLookZ = marioState.position[2] - cameraPos[2];
+
+        marioInputs.camLookX = marioState.position[0] - refcam[0];
+        marioInputs.camLookZ = marioState.position[2] - refcam[2];
         marioInputs.stickX = x_axis;
         marioInputs.stickY = y_axis;
-        marioState.lodState = 2;
-        marioState.lodsOverride = 1;
-        sm64_set_mario_water_level(marioId, -4610);
-        while (tick >= 1.f/60)
+        
+        while (tick >= 1.f/30)
         {   
             memcpy(lastPos, currPos, sizeof(currPos));
             memcpy(lastGeoPos, currGeoPos, sizeof(currGeoPos));
@@ -235,16 +239,27 @@ int main( void )
             tick -= 1.f/30;
 
             sm64_mario_tick( marioId, &marioInputs, &marioState, &marioGeometry );
-
             memcpy(currPos, marioState.position, sizeof(currPos));
             memcpy(currGeoPos, marioGeometry.position, sizeof(currGeoPos));
 
         }
+        //*
+        refcam[0] = marioState.camPos[0];
+        refcam[1] = marioState.camPos[1];
+        refcam[2] = marioState.camPos[2];
+        //*/
+        //uncomment this and comment the one above to use the non-sm64 camera
+        //also be sure to change the focus in renderer->draw
+        /*
+        refcam[0] = cameraPos[0];
+        refcam[1] = cameraPos[1];
+        refcam[2] = cameraPos[2];
+        /*/
 
-        for (int i=0; i<3; i++) marioState.position[i] = currPos[i];
+        for (int i=0; i<3; i++) marioState.position[i] = lerp(lastPos[i], currPos[i], tick);
         for (int i=0; i<marioGeometry.numTrianglesUsed*9; i++) marioGeometry.position[i] = lerp(lastGeoPos[i], currGeoPos[i], 1.f);
 
-        renderer->draw( &renderState, marioState.camPos, marioState.camFocus, &marioState, &marioGeometry );
+        renderer->draw( &renderState, refcam, marioState.camFocus, &marioState, &marioGeometry );
     }
     while( context_flip_frame_poll_events() );
 

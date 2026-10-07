@@ -221,8 +221,8 @@ SM64_LIB_FN int32_t sm64_mario_create( float x, float y, float z )
     find_floor( x, y, z, &gMarioState->floor );
 
     gCurGraphNodeCamera = malloc(sizeof(struct GraphNodeCamera));
-    vec3f_copy(gCurGraphNodeCamera->pos,gMarioState->marioObj->header.gfx.pos);
-    vec3f_copy(gCurGraphNodeCamera->focus,gMarioState->marioObj->header.gfx.pos);
+    vec3f_copy(gCurGraphNodeCamera->pos, gMarioState->marioObj->header.gfx.pos);
+    vec3f_copy(gCurGraphNodeCamera->focus, gMarioState->marioObj->header.gfx.pos);
     create_camera(gCurGraphNodeCamera, gCurrentArea->camera);
     gCurGraphNodeCamera->config.camera->mode = CAMERA_MODE_FREE_ROAM;
     gCurrentArea->camera = gCurGraphNodeCamera->config.camera;
@@ -265,18 +265,16 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     update_mario_platform(); // TODO platform grabbed here and used next tick could be a use-after-free
     
 
-    update_lakitu(gCurGraphNodeCamera->config.camera);
     update_camera(gCurGraphNodeCamera->config.camera);
+    update_lakitu(gCurGraphNodeCamera->config.camera);
     update_graph_node_camera(gCurGraphNodeCamera);
     
     gfx_adapter_bind_output_buffers( outBuffers );
 
     float camLookX = inputs->camLookX;
     float camLookZ = inputs->camLookZ;
-    // if using custom camera
-    camLookX = gMarioState->pos[0]-gCamera->pos[0];
-    camLookZ = gMarioState->pos[2]-gCamera->pos[2];
-    gMarioState->area->camera->yaw=atan2s( camLookZ, camLookX );
+
+    gMarioState->area->camera->yaw = atan2s( camLookZ, camLookX );
 
 
     geo_process_root_hack_single_node( s_mario_graph_node );
