@@ -52,6 +52,22 @@ typedef s16 MacroObject;
 typedef s16 Collision;
 typedef s16 Trajectory;
 typedef s16 PaintingData;
+/* A behavior script: an array of 32-bit command words.
+ *
+ * The element type, deliberately NOT an array type. Upstream n64decomp declares
+ * this `typedef uintptr_t BehaviorScript` (verified against
+ * include/types.h:54) and writes scripts as
+ *     const BehaviorScript bhvGoomba[] = { BEGIN(...), ... };
+ * i.e. an array OF the scalar, one entry per command word.
+ *
+ * Making this an incomplete array type (`typedef s32 BehaviorScript[]`) is a
+ * tempting-looking mistake: it makes `const BehaviorScript *` read like "pointer to
+ * a script", but then `const BehaviorScript bhvGoomba[] = {...}` becomes an array
+ * of incomplete type and fails to compile, and a pointer to it can neither be
+ * subscripted nor incremented -- which is exactly what the interpreter does on
+ * every command. The pointer that walks a script is declared `const s32 *`
+ * separately; see struct Object::curBhvCommand.
+ */
 typedef uintptr_t BehaviorScript;
 
 enum SpTaskState {
@@ -199,6 +215,12 @@ struct Object
     /*0x208*/ f32 hitboxDownOffset;
     /*0x20C*/ const BehaviorScript *behavior;
     /*0x210*/ u32 unused2;
+    /* Fork additions, reusing upstream's unused2. Behavior scripts record the
+     * object list in BEGIN() and the model in SET_MODEL(); both are needed now
+     * that scripts execute, and upstream keeps them in gObjectLists / the graph
+     * node instead, neither of which exists here. */
+    /*0x210*/ s16 oObjList;
+    /*0x212*/ s16 oModelID;
     /*0x214*/ struct SM64SurfaceObjectTransform *platform; // libsm64: type change from Object*
     /*0x218*/ void *collisionData;
     /*0x21C*/ Mat4 transform;

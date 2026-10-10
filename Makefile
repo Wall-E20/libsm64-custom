@@ -17,20 +17,27 @@ else
 endif
 CFLAGS := -fno-strict-aliasing -g -Wall -Wno-unused-function -fPIC -fvisibility=hidden -DSM64_LIB_EXPORT -DGBI_FLOATS -DVERSION_US -DNO_SEGMENTED_MEMORY
 
-SRC_DIRS  := src src/decomp src/decomp/engine src/decomp/include/PR src/decomp/game src/decomp/pc src/decomp/pc/audio src/decomp/mario src/decomp/tools src/decomp/audio
+SRC_DIRS  := src src/decomp src/decomp/data src/decomp/engine src/decomp/include/PR src/decomp/game src/decomp/pc src/decomp/pc/audio src/decomp/mario src/decomp/tools src/decomp/audio src/decomp/actors/goomba
 BUILD_DIR := build
 DIST_DIR  := dist
-ALL_DIRS  := $(addprefix $(BUILD_DIR)/,$(SRC_DIRS))
+ALL_DIRS  = $(addprefix $(BUILD_DIR)/,$(sort $(dir $(C_FILES))))
 
 LIB_FILE   := $(DIST_DIR)/libsm64.so
 LIB_H_FILE := $(DIST_DIR)/include/libsm64.h
 TEST_FILE  := run-test
 
-C_IMPORTED := src/decomp/mario/geo.inc.c src/decomp/mario/model.inc.c
+C_IMPORTED := src/decomp/mario/geo.inc.c src/decomp/mario/model.inc.c src/decomp/actors/goomba/geo.inc.c src/decomp/actors/goomba/model.inc.c src/decomp/actors/goomba/anims/anims.inc.c
 H_IMPORTED := $(C_IMPORTED:.c=.h)
 IMPORTED   := $(C_IMPORTED) $(H_IMPORTED)
 
-C_FILES := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c)) $(C_IMPORTED)
+# *.inc.c files are textual includes, not translation units: they carry no includes of
+# their own and rely on the prologue of whatever file #includes them (behaviour
+# sources rely on obj_behaviors.c's headers and `o` macro). The glob would otherwise
+# pick up e.g. actors/goomba/behavior.inc.c and compile it standalone, which fails with
+# hundreds of "unknown type name" errors. The ones that ARE translation units are
+# listed in C_IMPORTED.
+C_GLOB := $(foreach dir,$(SRC_DIRS),$(filter-out %.inc.c,$(wildcard $(dir)/*.c)))
+C_FILES := $(C_GLOB) $(C_IMPORTED)
 ifdef MACOS_BUILD
   O_FILES_x86_64 := $(foreach file,$(C_FILES),$(BUILD_DIR)/$(file:.c=_x86_64.o))
   O_FILES_arm64  := $(foreach file,$(C_FILES),$(BUILD_DIR)/$(file:.c=_arm64.o))
@@ -88,12 +95,12 @@ test/level.c: ./import-test-collision.py
 test/main.cpp test/gl20/gl20_renderer.c test/gl33core/gl33core_renderer.c: test/level.c
 
 $(BUILD_DIR)/test/%.o: test/%.c
-	@$(CC) $(CFLAGS) -MM -MP -MT $@ -MF $(BUILD_DIR)/test/$*.d $<
-	$(CC) -c $(CFLAGS) -o $@ $<
+	@$(CC) $(CFLAGS) -I src/decomp/include -MM -MP -MT $@ -MF $(BUILD_DIR)/test/$*.d $<
+	$(CC) -c $(CFLAGS) -I src/decomp/include -o $@ $<
 
 $(BUILD_DIR)/test/%.o: test/%.cpp
-	@$(CXX) $(CFLAGS) -MM -MP -MT $@ -MF $(BUILD_DIR)/test/$*.d $<
-	$(CXX) -c $(CFLAGS) -o $@ $<
+	@$(CXX) $(CFLAGS) -I src/decomp/include -MM -MP -MT $@ -MF $(BUILD_DIR)/test/$*.d $<
+	$(CXX) -c $(CFLAGS) -I src/decomp/include -o $@ $<
 
 $(TEST_FILE): $(LIB_FILE) $(TEST_OBJS)
 ifdef WINDOWS_BUILD

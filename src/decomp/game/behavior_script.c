@@ -36,3 +36,4 @@ f32 random_float(void) {
     f32 rnd = random_u16();
     return rnd / (double) 0x10000;
 }
+const BehaviorScript *gCurBhvCommand = NULL;

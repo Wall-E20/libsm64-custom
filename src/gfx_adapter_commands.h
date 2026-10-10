@@ -10,5 +10,6 @@ enum GFXAdapterCommands
     GFXCMD_SetTileSize,
     GFXCMD_SetTextureImage,
     GFXCMD_SubDisplayList,
+    GFXCMD_BranchList,
     GFXCMD_EndDisplayList,
 };

@@ -38,6 +38,7 @@
 #include "obj_pool.h"
 #include "fake_interaction.h"
 #include "decomp/game/camera.h"
+#include "object_helpers_min.h"
 
 static struct AllocOnlyPool *s_mario_geo_pool = NULL;
 static struct GraphNode *s_mario_graph_node = NULL;
@@ -108,7 +109,9 @@ SM64_LIB_FN void sm64_global_init( const uint8_t *rom, uint8_t *outTexture )
 
     s_init_global = true;
 
+
     load_mario_textures_from_rom( rom, outTexture );
+    load_goomba_textures_from_rom( rom, outTexture );
     load_mario_anims_from_rom( rom );
 
     memory_init();
@@ -217,7 +220,7 @@ SM64_LIB_FN int32_t sm64_mario_create( float x, float y, float z )
         return -1;
     }
 
-    set_mario_action( gMarioState, ACT_SPAWN_SPIN_AIRBORNE, 0);
+    set_mario_action( gMarioState, ACT_FREEFALL, 0);
     find_floor( x, y, z, &gMarioState->floor );
 
     gCurGraphNodeCamera = malloc(sizeof(struct GraphNodeCamera));
@@ -228,7 +231,7 @@ SM64_LIB_FN int32_t sm64_mario_create( float x, float y, float z )
     gCurrentArea->camera = gCurGraphNodeCamera->config.camera;
     gCurrentArea->camera->defMode = CAMERA_MODE_FREE_ROAM;
     init_camera(gCurGraphNodeCamera->config.camera);
-
+    cur_obj_become_tangible();
 
 
     return marioIndex;

@@ -10,6 +10,7 @@
 #include <pthread.h>
 
 #include "../src/libsm64.h"
+#include "../src/actorMgr.h"
 
 extern "C" {
 #define SDL_MAIN_HANDLED
@@ -75,13 +76,21 @@ int main( void )
     sm64_global_init( rom, texture );
     sm64_audio_init(rom);
     sm64_static_surfaces_load( surfaces, surfaces_count );
-    int32_t marioId = sm64_mario_create( 300, 7000, 100 );
-    sm64_set_mario_action(marioId, 0x0000192A);
-    
+    int32_t marioId = sm64_mario_create( 900, 3500, -200 );
+    //sm64_set_mario_action(marioId, 0x0000192A);
+
+    sm64_actor_init( rom );
+    int32_t goombaId = sm64_actor_spawn( SM64_ACTOR_GOOMBA, 1000, 3500, -500 );
+    if( goombaId < 0 )
+        printf( "failed to spawn goomba\n" );
+    else
+        printf( "goomba spawned, id = %d\n", goombaId );
+
     free( rom );
 
     RenderState renderState;
     renderState.mario.index = NULL;
+    renderState.actor.index = NULL;
     vec3 cameraPos = { 0, 0, 0 };
     float cameraRot = 0.0f;
 
@@ -113,14 +122,23 @@ int main( void )
     marioGeometry.uv       = (float*)malloc( sizeof(float) * 6 * SM64_GEO_MAX_TRIANGLES );
     marioGeometry.numTrianglesUsed = 0;
 
+
+    struct SM64MarioGeometryBuffers actorGeometry;
+    actorGeometry.position = (float*)malloc( sizeof(float) * 9 * SM64_GEO_MAX_TRIANGLES );
+    actorGeometry.color    = (float*)malloc( sizeof(float) * 9 * SM64_GEO_MAX_TRIANGLES );
+    actorGeometry.normal   = (float*)malloc( sizeof(float) * 9 * SM64_GEO_MAX_TRIANGLES );
+    actorGeometry.uv       = (float*)malloc( sizeof(float) * 6 * SM64_GEO_MAX_TRIANGLES );
+    actorGeometry.numTrianglesUsed = 0;
+    struct SM64ActorState actorState;
+
     float tick = 0;
     uint32_t lastTicks = SDL_GetTicks();
     int cameramode = 0x01;
     audio_init();
-    sm64_set_camera_mode(cameramode, 0);
+    //sm64_set_camera_mode(cameramode, 0);
     sm64_play_music(0, 0x08 | 0x80, 0); // from decomp/include/seq_ids.h: SEQ_LEVEL_WATER | SEQ_VARIATION
 
-    marioState.lodState = 1;
+    marioState.lodState = 0;
     marioState.lodsOverride = 1;
     sm64_set_mario_water_level(marioId, -4610);
     do
@@ -239,6 +257,8 @@ int main( void )
             tick -= 1.f/30;
 
             sm64_mario_tick( marioId, &marioInputs, &marioState, &marioGeometry );
+            if( goombaId >= 0 )
+                sm64_actor_tick( goombaId, &actorState, &actorGeometry );
             memcpy(currPos, marioState.position, sizeof(currPos));
             memcpy(currGeoPos, marioGeometry.position, sizeof(currGeoPos));
 
@@ -259,7 +279,7 @@ int main( void )
         for (int i=0; i<3; i++) marioState.position[i] = lerp(lastPos[i], currPos[i], tick);
         for (int i=0; i<marioGeometry.numTrianglesUsed*9; i++) marioGeometry.position[i] = lerp(lastGeoPos[i], currGeoPos[i], 1.f);
 
-        renderer->draw( &renderState, refcam, marioState.camFocus, &marioState, &marioGeometry );
+        renderer->draw( &renderState, refcam, marioState.camFocus, &marioState, &marioGeometry, goombaId >= 0 ? &actorGeometry : NULL );
     }
     while( context_flip_frame_poll_events() );
 

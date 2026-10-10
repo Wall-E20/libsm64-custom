@@ -278,9 +278,11 @@ static void gl33core_init(RenderState *renderState, uint8_t *marioTexture)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SM64_TEXTURE_WIDTH, SM64_TEXTURE_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, marioTexture);
 }
 
-static void gl33core_draw(RenderState *renderState, const vec3 camPos, const vec3 camFocus, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo)
+static void gl33core_draw(RenderState *renderState, const vec3 camPos, const vec3 camFocus, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo, struct SM64MarioGeometryBuffers *actorGeo)
 {
 	update_mario_mesh( &renderState->mario, marioGeo );
+	if( actorGeo != NULL )
+		update_mario_mesh( &renderState->actor, actorGeo );
 
 	mat4 model, view, projection;
 	glm_perspective( 45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 100.0f, 20000.0f, projection );
@@ -305,6 +307,12 @@ static void gl33core_draw(RenderState *renderState, const vec3 camPos, const vec
 	glUniformMatrix4fv( glGetUniformLocation( renderState->mario_shader, "projection" ), 1, GL_FALSE, (GLfloat*)projection );
 	glUniform1i( glGetUniformLocation( renderState->mario_shader, "marioTex" ), 0 );
 	glDrawElements( GL_TRIANGLES, renderState->mario.num_vertices, GL_UNSIGNED_SHORT, renderState->mario.index );
+
+	if( actorGeo != NULL && renderState->actor.num_vertices > 0 )
+	{
+		glBindVertexArray( renderState->actor.vao );
+		glDrawElements( GL_TRIANGLES, renderState->actor.num_vertices, GL_UNSIGNED_SHORT, renderState->actor.index );
+	}
 }
 
 struct Renderer gl33core_renderer = {

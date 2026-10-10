@@ -43,6 +43,7 @@ struct GlobalState
     struct MarioAnimation mD_80339D10;
     struct MarioState mgMarioStateVal;
     struct LakituState mgLakituState;
+    struct ObjectNode *gObjectLists;
 };
 
 // From mario_actions_submerged.c, needed to initialize global state

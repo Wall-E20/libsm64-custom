@@ -160,7 +160,7 @@ static void gl20_init(RenderState *renderState, uint8_t *marioTexture)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, worldTextureSize[0], worldTextureSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, worldTextureRaw);
 }
 
-static void gl20_draw(RenderState *renderState, const vec3 camPos, const vec3 camFocus, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo)
+static void gl20_draw(RenderState *renderState, const vec3 camPos, const vec3 camFocus, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo, struct SM64MarioGeometryBuffers *actorGeo)
 {
 	mat4 model, view, projection;
 	glm_perspective( 45.0f, (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT, 100.0f, 20000.0f, projection );
@@ -220,6 +220,23 @@ static void gl20_draw(RenderState *renderState, const vec3 camPos, const vec3 ca
 	glLoadIdentity();
 
 	glDrawElements(GL_TRIANGLES, triangleSize, GL_UNSIGNED_SHORT, renderState->mario.index);
+
+	if( actorGeo != NULL )
+	{
+		update_mario_mesh( &renderState->actor, actorGeo );
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glEnableClientState(GL_COLOR_ARRAY);
+		glDrawElements(GL_TRIANGLES, renderState->actor.num_vertices, GL_UNSIGNED_SHORT, renderState->actor.index);
+
+		glDisableClientState(GL_COLOR_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glBindTexture(GL_TEXTURE_2D, renderState->mario_texture);
+		glMatrixMode(GL_TEXTURE);
+		glLoadIdentity();
+
+		glDrawElements(GL_TRIANGLES, renderState->actor.num_vertices, GL_UNSIGNED_SHORT, renderState->actor.index);
+	}
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_LIGHTING);

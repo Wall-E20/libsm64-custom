@@ -32,6 +32,14 @@ static void mtxf_mul_vec3f_x(Mat4 mtx, Vec3f b, float w, Vec3f out)
 
 static void convert_uv_to_atlas( float *atlas_uv_out, short tc[] )
 {
+
+    if( s_texWidth <= 0.0f || s_texHeight <= 0.0f )
+    {
+        atlas_uv_out[0] = 1.0f;
+        atlas_uv_out[1] = 1.0f;
+        return;
+    }
+
     float u = (float)((tc[0] * s_scaleS >> 16) - 8*s_uls) / 32.0f / s_texWidth;
     float v = (float)((tc[1] * s_scaleT >> 16) - 8*s_ult) / 32.0f / s_texHeight;
 
@@ -114,12 +122,7 @@ static void process_display_list( void *dl )
                 }
                 else
                 {
-                    *s_uvPtr++ = 1.0f;
-                    *s_uvPtr++ = 1.0f;
-                    *s_uvPtr++ = 1.0f;
-                    *s_uvPtr++ = 1.0f;
-                    *s_uvPtr++ = 1.0f;
-                    *s_uvPtr++ = 1.0f;
+                    for( int i = 0; i < 6; ++i ) *s_uvPtr++ = 1.0f;
                 }
 
                 s_outBuffers->numTrianglesUsed = (uint16_t)((s_trianglePtr - s_outBuffers->position) / 9);
@@ -160,9 +163,15 @@ static void process_display_list( void *dl )
             {
                 intptr_t i = *ptr++;
 
+                if( i < 0 || i >= NUM_USED_TEXTURES )
+                {
+                    s_textureOn = FALSE;
+                    break;
+                }
+
                 s_textureIndex = (int)i;
-                s_texWidth = mario_tex_widths[s_textureIndex];
-                s_texHeight = mario_tex_heights[s_textureIndex];
+                s_texWidth = sm64_tex_widths[s_textureIndex];
+                s_texHeight = sm64_tex_heights[s_textureIndex];
 
                 break;
             }
@@ -185,6 +194,13 @@ static void process_display_list( void *dl )
                 intptr_t dl = *ptr++;
                 process_display_list( (void*)dl );
                 break;
+            }
+
+            case GFXCMD_BranchList:
+            {
+                intptr_t dl = *ptr++;
+                process_display_list( (void*)dl );
+                goto break_top;
             }
 
             case GFXCMD_EndDisplayList:
@@ -214,4 +230,12 @@ void gfx_adapter_bind_output_buffers( struct SM64MarioGeometryBuffers *outBuffer
     s_normalPtr = s_outBuffers->normal;
     s_uvPtr = s_outBuffers->uv;
     s_outBuffers->numTrianglesUsed = 0;
+    s_textureOn = FALSE;
+    s_textureIndex = 0;
+    s_texWidth = 64.0f;
+    s_texHeight = 64.0f;
+    s_scaleS = 0xFFFF;
+    s_scaleT = 0xFFFF;
+    s_uls = 0;
+    s_ult = 0;
 }

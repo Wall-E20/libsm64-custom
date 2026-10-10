@@ -126,3 +126,15 @@ typedef intptr_t Gfx;
 #define gsDPSetTile(fmt, siz, line, tmem, tile, palette, cmt, maskt, shiftt, cms, masks, shifts) (GFXCMD_None)
 #define gsDPLoadBlock(tile, uls, ult, lrs, dxt) (GFXCMD_None)
 #define gsDPLoadSync() (GFXCMD_None)
+#define gsSPNumLights(n) (GFXCMD_None)
+
+#define NUMLIGHTS_0 0
+#define NUMLIGHTS_1 1
+#define NUMLIGHTS_4 4
+#define NUMLIGHTS_5 5
+#define NUMLIGHTS_7 7
+#define NUMLIGHTS_8 8
+
+#define gsSPBranchList(dl) \
+    GFXCMD_BranchList, \
+    (intptr_t)dl

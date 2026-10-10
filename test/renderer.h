@@ -49,6 +49,7 @@ typedef struct RenderState
 {
     CollisionMesh collision;
     MarioMesh mario;
+    MarioMesh actor;
     GLuint world_shader;
     GLuint mario_shader;
     GLuint mario_texture;
@@ -59,7 +60,7 @@ RenderState;
 struct Renderer
 {
 	void (*init)(RenderState *renderState, uint8_t *marioTexture);
-	void (*draw)(RenderState *renderState, const vec3 camPos, const vec3 camFocus, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo);
+	void (*draw)(RenderState *renderState, const vec3 camPos, const vec3 camFocus, const struct SM64MarioState *marioState, struct SM64MarioGeometryBuffers *marioGeo, struct SM64MarioGeometryBuffers *actorGeo);
 };
 
 #endif

@@ -137,9 +137,19 @@ struct RenderModeContainer renderModeTable_2Cycle[2] = { { {
 
 struct GraphNodeRoot *gCurGraphNodeRoot = NULL;
 struct GraphNodeMasterList *gCurGraphNodeMasterList = NULL;
+
+/*
+ * Whether geo_process_master_list_sub() should discard the first entry of the
+ * first non-empty layer. Only Mario's tree needs this (see the comment there);
+ * actors set it false so their display lists are all emitted.
+ */
+static int s_skipFirstDisplayList = TRUE;
 struct GraphNodePerspective *gCurGraphNodeCamFrustum = NULL;
 struct GraphNodeCamera *gCurGraphNodeCamera = NULL;
 struct GraphNodeObject *gCurGraphNodeObject = NULL;
+
+/* Set by sm64_actor_tick() around an actor's graph walk. See the header. */
+struct Object *gCurGraphNodeActor = NULL;
 struct GraphNodeHeldObject *gCurGraphNodeHeldObject = NULL;
 
 #ifdef F3DEX_GBI_2
@@ -169,10 +179,16 @@ static void geo_process_master_list_sub(struct GraphNodeMasterList *node) {
         gSPSetGeometryMode(gDisplayListHead++, G_ZBUFFER);
     }
 
-    // libsm64 HACK 
-    // Mario ends up in the second master list for some reason.
-    // The first item in the list is the projection matrix that is uninitialized, so just skip it.
-    int xx = FALSE;
+    // libsm64 HACK
+    // Mario's tree contributes a bogus first entry (an uninitialized projection
+    // matrix, not a display list at all) which has always been skipped.
+    //
+    // That skip used to be unconditional, which silently ate a real display list
+    // from any tree that did not happen to produce that garbage entry -- it is
+    // what ate goomba's head/body (goomba_seg8_dl_0801D760). It is now opt-in via
+    // s_skipFirstDisplayList, set only by Mario's entry point, so actor trees emit
+    // every list they append.
+    int xx = !s_skipFirstDisplayList;
     for (i = 1; i < GFX_NUM_MASTER_LISTS; i++) {
         if ((currList = node->listHeads[i]) != NULL) {
 //          gDPSetRenderMode(gDisplayListHead++, modeList->modes[i], mode2List->modes[i]);
@@ -739,6 +755,15 @@ static void geo_process_shadow(struct GraphNodeShadow *node) {
 //  if (node->node.children != NULL) {
 //      geo_process_node_and_siblings(node->node.children);
 //  }
+    /* The shadow-drawing code above is commented out in this fork, but the
+     * recursion into the children must still happen: the shadow node is the
+     * root of every actor geo layout, so without this the whole subtree -- and
+     * all of its display lists -- is skipped. Mario does not hit this because
+     * its master list sits above the shadow node; an actor's master list hangs
+     * the shadow below it, making the shadow the first node dispatched. */
+    if (node->node.children != NULL) {
+        geo_process_node_and_siblings(node->node.children);
+    }
 }
 
 /**
@@ -1156,6 +1181,8 @@ void geo_process_root_hack_single_node(struct GraphNode *node)
     }
     geo_set_animation_globals(&gMarioObject->header.gfx.animInfo, 1);
 
+    s_skipFirstDisplayList = TRUE;
+
     gCurGraphNodeRoot = (struct GraphNodeRoot *)node;
     if (node->children != NULL) {
         geo_process_node_and_siblings(node->children);
@@ -1163,6 +1190,75 @@ void geo_process_root_hack_single_node(struct GraphNode *node)
     gCurGraphNodeRoot = NULL;
 
     gMarioObject->header.gfx.throwMatrix = NULL;
+
+    alloc_only_pool_free(gDisplayListHeap);
+}
+
+/**
+ * Same as geo_process_root_hack_single_node(), but renders `obj` instead of Mario.
+ *
+ * The Mario version reads gMarioObject throughout for the model matrix and the
+ * animation state, so it cannot be reused for actors: they have their own Object,
+ * and gMarioObject may not even exist. Without this an actor dereferences NULL.
+ */
+void geo_process_root_hack_single_node_obj(struct Object *obj, struct GraphNode *node)
+{
+    gDisplayListHead = NULL;
+
+    display_list_pool_reset();
+
+    Mtx *initialMatrix;
+
+    gDisplayListHeap = alloc_only_pool_init();
+    initialMatrix = alloc_display_list(sizeof(*initialMatrix));
+    gMatStackIndex = 0;
+    gCurAnimType = 0;
+
+    mtxf_identity(gMatStack[gMatStackIndex]);
+    mtxf_to_mtx(initialMatrix, gMatStack[gMatStackIndex]);
+    gMatStackFixed[gMatStackIndex] = initialMatrix;
+
+    gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(gMatStackFixed[gMatStackIndex]),
+                G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+
+    if (obj->header.gfx.throwMatrix != NULL) {
+        mtxf_mul(gMatStack[gMatStackIndex + 1], *obj->header.gfx.throwMatrix, gMatStack[gMatStackIndex]);
+        mtxf_scale_vec3f( gMatStack[gMatStackIndex + 1], gMatStack[gMatStackIndex + 1], obj->header.gfx.scale );
+        obj->header.gfx.throwMatrix = &gMatStack[++gMatStackIndex];
+    }
+    else {
+        Mat4 identity, scale, rotTran;
+        mtxf_identity( identity );
+        mtxf_scale_vec3f( scale, identity, obj->header.gfx.scale );
+        mtxf_rotate_zxy_and_translate( rotTran, obj->header.gfx.pos, obj->header.gfx.angle );
+        mtxf_mul( gMatStack[++gMatStackIndex], scale, rotTran );
+    }
+    /* Only drive the animation system if this object actually has one loaded. Actors
+     * start out as a zeroed Object (curAnim == NULL), and geo_set_animation_globals()
+     * dereferences `anim` regardless of its hasAnimation argument, so skip it then. */
+    if (obj->header.gfx.animInfo.curAnim != NULL) {
+        geo_set_animation_globals(&obj->header.gfx.animInfo, 1);
+    }
+
+    /* Actor trees have no bogus projection-matrix entry, so nothing to skip --
+     * skipping here silently dropped the first (real) display list, i.e. goomba's
+     * head. See s_skipFirstDisplayList. */
+    s_skipFirstDisplayList = FALSE;
+
+    gCurGraphNodeRoot = (struct GraphNodeRoot *)node;
+    if (node->type == GRAPH_NODE_TYPE_MASTER_LIST) {
+        /* Actors pass their master list in as `node` (their geo layout has no
+         * master list of its own -- see actorMgr.c). geo_process_master_list()
+         * is what sets gCurGraphNodeMasterList and drains the accumulated lists
+         * through the adapter, so the node itself must be dispatched here rather
+         * than its children. */
+        geo_process_node_and_siblings(node);
+    } else if (node->children != NULL) {
+        geo_process_node_and_siblings(node->children);
+    }
+    gCurGraphNodeRoot = NULL;
+
+    obj->header.gfx.throwMatrix = NULL;
 
     alloc_only_pool_free(gDisplayListHeap);
 }

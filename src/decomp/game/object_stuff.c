@@ -81,11 +81,22 @@ static struct Object *allocate_object(void) {
     return obj;
 }
 
-static struct Object *create_object(void) {
+struct Object *create_object(void) {
     struct Object *obj;
     obj = allocate_object();
     obj->curBhvCommand = NULL;
     obj->behavior = NULL;
+    return obj;
+}
+
+struct Object *create_object_bhv(const BehaviorScript *bhvScript) {
+    struct Object *obj;
+
+    obj = allocate_object();
+
+    obj->curBhvCommand = bhvScript;
+    obj->behavior = bhvScript;
+
     return obj;
 }
 

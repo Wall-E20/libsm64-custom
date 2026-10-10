@@ -19,6 +19,7 @@
 #include "interaction.h"
 #include "level_update.h"
 #include "mario.h"
+#include "../../fake_interaction.h"
 #include "mario_step.h"
 #include "memory.h"
 //#include "obj_behaviors.h"
@@ -67,6 +68,105 @@ static u32 interact_noop(struct MarioState *m, u32 interactType, struct Object *
     return FALSE;
 }
 
+/*
+ * Adapters bridging sInteractionHandlers' (MarioState, interactType, Object *)
+ * signature to the fake_interaction.c implementations, which were written for
+ * this fork and take the target's position directly instead of an Object.
+ *
+ * Every handler in the table below used to be interact_noop, which made Mario
+ * completely inert: the dispatcher found the colliding actor, called the
+ * handler, and the handler returned FALSE having done nothing. That is why
+ * actors could be walked into without any reaction.
+ *
+ * Only the four types an actor can actually produce are wired. The rest stay
+ * noop because they need level objects this fork does not have.
+ */
+/* Defined below; used by the adapters up here. */
+u32 attack_object(struct Object *o, s32 interaction);
+
+static u32 interact_bounce_top(struct MarioState *m, u32 interactType UNUSED, struct Object *o)
+{
+    u32 interaction;
+    if (m->flags & MARIO_METAL_CAP) {
+        interaction = INT_FAST_ATTACK_OR_SHELL;
+    } else {
+        interaction = fake_determine_interaction(m, o->oPosX, o->oPosY, o->oPosZ);
+    }
+
+    if (interaction & INT_ATTACK_NOT_FROM_BELOW) {
+
+        attack_object(o, (s32)interaction);
+        fake_bounce_back_from_attack(m, interaction);
+
+        if (interaction & INT_HIT_FROM_ABOVE) {
+            fake_bounce_off_object(m, o->oPosX, o->oPosY, o->oPosZ, o->hitboxHeight, 30.0f);
+        }
+        return FALSE;
+    } else if (fake_damage_knock_back(m, o->oDamageOrCoinValue, o->oInteractionSubtype,
+                                      o->oPosX, o->oPosY, o->oPosZ)) {
+        o->oInteractStatus = INT_STATUS_INTERACTED | INT_STATUS_ATTACKED_MARIO;
+        return TRUE;
+    }
+
+    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
+        sDelayInvincTimer = TRUE;
+    }
+    return FALSE;
+}
+
+static u32 interact_bounce_top2(struct MarioState *m, u32 interactType UNUSED, struct Object *o)
+{
+    return interact_bounce_top(m, interactType, o);
+}
+
+static u32 interact_hit_from_below(struct MarioState *m, u32 interactType UNUSED, struct Object *o)
+{
+    u32 interaction;
+    if (m->flags & MARIO_METAL_CAP) {
+        interaction = INT_FAST_ATTACK_OR_SHELL;
+    } else {
+        interaction = fake_determine_interaction(m, o->oPosX, o->oPosY, o->oPosZ);
+    }
+
+    if (interaction & INT_ANY_ATTACK) {
+        attack_object(o, (s32)interaction);
+        fake_bounce_back_from_attack(m, interaction);
+
+        if (interaction & INT_HIT_FROM_BELOW) {
+            m->vel[1] = 0.0f;
+        }
+        if (interaction & INT_HIT_FROM_ABOVE) {
+            fake_bounce_off_object(m, o->oPosX, o->oPosY, o->oPosZ, o->hitboxHeight, 30.0f);
+        }
+        return FALSE;
+    } else if (fake_damage_knock_back(m, o->oDamageOrCoinValue, o->oInteractionSubtype,
+                                      o->oPosX, o->oPosY, o->oPosZ)) {
+        o->oInteractStatus = INT_STATUS_INTERACTED | INT_STATUS_ATTACKED_MARIO;
+        return TRUE;
+    }
+
+    if (!(o->oInteractionSubtype & INT_SUBTYPE_DELAY_INVINCIBILITY)) {
+        sDelayInvincTimer = TRUE;
+    }
+    return FALSE;
+}
+
+static u32 interact_damage(struct MarioState *m, u32 interactType UNUSED, struct Object *o)
+{
+
+    if (!(m->action & ACT_FLAG_ATTACKING)) {
+        return FALSE;
+    }
+    u32 interaction = fake_determine_interaction(m, o->oPosX, o->oPosY, o->oPosZ);
+    if (!(interaction & INT_ANY_ATTACK)) {
+        return FALSE;
+    }
+    attack_object(o, (s32)interaction);
+    fake_bounce_back_from_attack(m, interaction);
+    return TRUE;
+}
+
+
 static struct InteractionHandler sInteractionHandlers[] = {
     { INTERACT_COIN,           interact_noop },
     { INTERACT_WATER_RING,     interact_noop },
@@ -85,11 +185,11 @@ static struct InteractionHandler sInteractionHandlers[] = {
     { INTERACT_CLAM_OR_BUBBA,  interact_noop },
     { INTERACT_BULLY,          interact_noop },
     { INTERACT_SHOCK,          interact_noop },
-    { INTERACT_BOUNCE_TOP2,    interact_noop },
+    { INTERACT_BOUNCE_TOP2,    interact_bounce_top2 },
     { INTERACT_MR_BLIZZARD,    interact_noop },
-    { INTERACT_HIT_FROM_BELOW, interact_noop },
-    { INTERACT_BOUNCE_TOP,     interact_noop },
-    { INTERACT_DAMAGE,         interact_noop },
+    { INTERACT_HIT_FROM_BELOW, interact_hit_from_below },
+    { INTERACT_BOUNCE_TOP,     interact_bounce_top },
+    { INTERACT_DAMAGE,         interact_damage },
     { INTERACT_POLE,           interact_noop },
     { INTERACT_HOOT,           interact_noop },
     { INTERACT_BREAKABLE,      interact_noop },

@@ -11,6 +11,7 @@
 
 #define CELL_HEIGHT_LIMIT   100000.f
 #define FLOOR_LOWER_LIMIT  -110000.f
+#define FLOOR_LOWER_LIMIT_MISC      (FLOOR_LOWER_LIMIT + 1000)
 
 s32 f32_find_wall_collision(f32 *xPtr, f32 *yPtr, f32 *zPtr, f32 offsetY, f32 radius);
 s32 find_wall_collisions(struct SM64WallCollisionData *colData);
