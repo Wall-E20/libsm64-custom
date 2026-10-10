@@ -1,3 +1,11 @@
+#include "../../../decomp/include/sm64.h"
+#include "../../../decomp/include/types.h"
+#include "../../../decomp/include/geo_commands.h"
+#include "../../../decomp/game/rendering_graph_node.h"
+#include "../../../decomp/shim.h"
+#include "../../../decomp/game/object_stuff.h"
+#include "../../../decomp/game/behavior_actions.h"
+#include "model.inc.h"
 // 0x16000EA0
 const GeoLayout star_geo[] = {
     GEO_SHADOW(SHADOW_CIRCLE_4_VERTS, 0x9B, 100),

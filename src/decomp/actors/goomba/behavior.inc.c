@@ -1,5 +1,3 @@
-
-
 static struct ObjectHitbox sGoombaHitbox = {
     /* interactType:      */ INTERACT_BOUNCE_TOP,
     /* downOffset:        */ 0,

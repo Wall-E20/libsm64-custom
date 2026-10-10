@@ -17,7 +17,7 @@ else
 endif
 CFLAGS := -fno-strict-aliasing -g -Wall -Wno-unused-function -fPIC -fvisibility=hidden -DSM64_LIB_EXPORT -DGBI_FLOATS -DVERSION_US -DNO_SEGMENTED_MEMORY
 
-SRC_DIRS  := src src/decomp src/decomp/data src/decomp/engine src/decomp/include/PR src/decomp/game src/decomp/pc src/decomp/pc/audio src/decomp/mario src/decomp/tools src/decomp/audio src/decomp/actors/goomba
+SRC_DIRS  := src src/decomp src/decomp/data src/decomp/engine src/decomp/include/PR src/decomp/game src/decomp/pc src/decomp/pc/audio src/decomp/mario src/decomp/tools src/decomp/audio src/decomp/actors/goomba src/decomp/actors/coin
 BUILD_DIR := build
 DIST_DIR  := dist
 ALL_DIRS  = $(addprefix $(BUILD_DIR)/,$(sort $(dir $(C_FILES))))
@@ -26,7 +26,7 @@ LIB_FILE   := $(DIST_DIR)/libsm64.so
 LIB_H_FILE := $(DIST_DIR)/include/libsm64.h
 TEST_FILE  := run-test
 
-C_IMPORTED := src/decomp/mario/geo.inc.c src/decomp/mario/model.inc.c src/decomp/actors/goomba/geo.inc.c src/decomp/actors/goomba/model.inc.c src/decomp/actors/goomba/anims/anims.inc.c
+C_IMPORTED := src/decomp/mario/geo.inc.c src/decomp/mario/model.inc.c src/decomp/actors/goomba/geo.inc.c src/decomp/actors/goomba/model.inc.c src/decomp/actors/goomba/anims/anims.inc.c src/decomp/actors/coin/geo.inc.c src/decomp/actors/coin/model.inc.c
 H_IMPORTED := $(C_IMPORTED:.c=.h)
 IMPORTED   := $(C_IMPORTED) $(H_IMPORTED)
 

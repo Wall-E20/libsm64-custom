@@ -20,10 +20,12 @@
 #include "decomp/game/object_list_processor.h"
 #include "decomp/game/rendering_graph_node.h"
 #include "decomp/actors/goomba/geo.inc.h"
+#include "decomp/actors/coin/geo.inc.h"
 #include "object_constants_min.h"
 #include "object_helpers_min.h"
 #include "object_collision_min.h"
 #include "decomp/actors/goomba/model.inc.h"
+#include "decomp/actors/coin/model.inc.h"
 #include "decomp/include/behavior_data.h"        //
 #include "decomp/game/behavior_script.h"       //sm64_behavior_run_script
 
@@ -104,6 +106,7 @@ struct Object *getActor( int32_t actorId )
     return actor != NULL ? actor->object : NULL;
 }
 
+int getActorObjList(int32_t actorId)
 {
     struct ActorInstance *actor = get_actor( actorId );
     if( actor == NULL || actor->object == NULL ) return (int)OBJ_LIST_DEFAULT;

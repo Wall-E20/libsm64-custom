@@ -21,6 +21,7 @@
  * means adding its geometry header, its anims header and its behaviour header here
  * -- the script below is then the only other thing to touch. */
 #include "../actors/goomba/model.inc.h"       /* goomba_seg8_anims_0801DA4C */
+#include "../actors/coin/model.inc.h"       /* goomba_seg8_anims_0801DA4C */
 #include "../game/obj_behaviors.h"          /* bhv_goomba_init / _update */
 
 #define BC_B(a) _SHIFTL(a, 24, 8)

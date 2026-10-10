@@ -19,6 +19,7 @@
 #include "../audio/external.h"
 #include "../include/seq_ids.h"
 #include "../actors/goomba/model.inc.h"
+#include "../actors/coin/model.inc.h"
 
 #define o (gCurrentObject)
 
@@ -31,3 +32,4 @@ struct Object *spawn_object_relative(UNUSED u32 modelId, UNUSED s16 relX, UNUSED
     return NULL;
 }
 #include "../actors/goomba/behavior.inc.c"
+#include "../actors/coin/behavior.inc.c"

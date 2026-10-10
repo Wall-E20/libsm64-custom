@@ -1,3 +1,14 @@
+#include "../../../decomp/include/sm64.h"
+#include "../../../decomp/include/types.h"
+#include "../../../decomp/include/geo_commands.h"
+#include "../../../decomp/game/rendering_graph_node.h"
+#include "../../../decomp/shim.h"
+#include "../../../decomp/game/object_stuff.h"
+#include "../../../decomp/game/behavior_actions.h"
+#include "model.inc.h"
+
+#define SHADOW_CIRCLE_4_VERTS 0
+
 // 0x1600013C
 const GeoLayout yellow_coin_geo[] = {
     GEO_SHADOW(SHADOW_CIRCLE_4_VERTS, 0xB4, 50),
@@ -111,3 +122,12 @@ const GeoLayout red_coin_no_shadow_geo[] = {
     GEO_CLOSE_NODE(),
     GEO_END(),
 };
+
+
+void *yellow_coin_geo_ptr = (void *)yellow_coin_geo;
+void *red_coin_geo_ptr = (void *)red_coin_geo;
+void *blue_coin_geo_ptr = (void *)blue_coin_geo;
+
+void *yellow_coin_no_shadow_geo_ptr = (void *)yellow_coin_no_shadow_geo;
+void *red_coin_no_shadow_geo_ptr = (void *)red_coin_no_shadow_geo;
+void *blue_coin_no_shadow_geo_ptr = (void *)blue_coin_no_shadow_geo;

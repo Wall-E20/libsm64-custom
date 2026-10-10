@@ -23,7 +23,7 @@ static const Vtx coin_seg3_vertex_03005740[] = {
     {{{    35,     70,      0}, 0, {  1984,      0}, {0xff, 0x00, 0x00, 0xff}}},
     {{{   -35,     70,      0}, 0, {     0,      0}, {0xff, 0x00, 0x00, 0xff}}},
 };
-
+/*
 // 0x03005780
 ALIGNED8 static const Texture coin_seg3_texture_03005780[] = {
 #include "actors/coin/coin_front.ia16.inc.c"
@@ -43,7 +43,7 @@ ALIGNED8 static const Texture coin_seg3_texture_03006780[] = {
 ALIGNED8 static const Texture coin_seg3_texture_03006F80[] = {
 #include "actors/coin/coin_tilt_left.ia16.inc.c"
 };
-
+*/
 // 0x03007780 - 0x030077D0
 const Gfx coin_seg3_dl_03007780[] = {
     gsDPPipeSync(),
