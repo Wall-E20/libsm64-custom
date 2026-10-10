@@ -1,7 +1,12 @@
 #include "behavior_script.h"
-
+#include "../../object_helpers_min.h"
 static u16 gRandomSeed16;
 
+
+f32 random_float(void) {
+    f32 rnd = random_u16();
+    return rnd / (double) 0x10000;
+}
 // Generate a pseudorandom integer from 0 to 65535 from the random seed, and update the seed.
 u16 random_u16(void) {
     u16 temp1, temp2;
@@ -30,10 +35,7 @@ u16 random_u16(void) {
 
     return gRandomSeed16;
 }
-
-// Generate a pseudorandom float in the range [0, 1).
-f32 random_float(void) {
-    f32 rnd = random_u16();
-    return rnd / (double) 0x10000;
-}
 const BehaviorScript *gCurBhvCommand = NULL;
+
+
+

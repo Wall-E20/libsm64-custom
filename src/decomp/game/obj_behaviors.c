@@ -31,5 +31,6 @@ struct Object *spawn_object_relative(UNUSED u32 modelId, UNUSED s16 relX, UNUSED
                                      UNUSED s16 model, UNUSED const BehaviorScript *behavior) {
     return NULL;
 }
+
 #include "../actors/goomba/behavior.inc.c"
 #include "../actors/coin/behavior.inc.c"

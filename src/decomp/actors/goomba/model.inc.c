@@ -1,10 +1,5 @@
 // Goomba
-//
-// These two includes are what make this file build in libsm64 rather than as
-// plain n64decomp source: gfx_macros.h swaps the real GBI macros for the
-// GFXCMD_* command stream that gfx_adapter.c consumes, and load_tex_data.h
-// supplies the texture enum gsDPSetTextureImage() indexes with. Same pair
-// import-mario-geo.py prepends to Mario's model.inc.c.
+
 #include "../../../gfx_macros.h"
 #include "load_tex_data.h"
 

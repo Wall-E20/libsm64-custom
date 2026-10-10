@@ -37,6 +37,12 @@ const int goomba_tex_offsets[SM64_TEX_GOOMBA_COUNT] = {
     SEG8_BASE + 0x1A530 + 0x22,
 };
 
+const int coin_tex_offsets[SM64_TEX_COIN_COUNT] = {
+    SEG8_BASE + 0x19530 + 0x22,
+    SEG8_BASE + 0x19D30 + 0x22,
+    SEG8_BASE + 0x1A530 + 0x22,
+};
+
 static void blt_image_to_atlas( rgba *img, int slot, int w, int h, uint8_t *outTexture )
 {
     for( int iy = 0; iy < h; ++iy )
@@ -100,6 +106,32 @@ void load_goomba_textures_from_rom( const uint8_t *rom, uint8_t *outTexture )
         rgba *img = raw2rgba( raw, w, h, 16 );
         if( !img ) continue;
         blt_image_to_atlas( img, SM64_TEX_GOOMBA_BASE + i, w, h, outTexture );
+        free( img );
+    }
+
+    free( block );
+}
+
+void load_coin_textures_from_rom( const uint8_t *rom, uint8_t *outTexture )
+{
+    mio0_header_t head;
+    if( !mio0_decode_header( rom + SEG8_BLOCK_ROM_OFFSET, &head ) ) return;
+
+    uint8_t *block = malloc( head.dest_size );
+    if( !block ) return;
+    if( mio0_decode( rom + SEG8_BLOCK_ROM_OFFSET, block, NULL ) <= 0 ) { free( block ); return; }
+
+    for( int i = 0; i < SM64_TEX_COIN_COUNT; ++i )
+    {
+        int off = coin_tex_offsets[i];
+        int w = sm64_tex_widths[SM64_TEX_COIN_BASE + i];
+        int h = sm64_tex_heights[SM64_TEX_COIN_BASE + i];
+        if( off < 0 || off + w * h * 2 > (int)head.dest_size ) continue;
+
+        uint8_t *raw = block + off;
+        rgba *img = raw2rgba( raw, w, h, 16 );
+        if( !img ) continue;
+        blt_image_to_atlas( img, SM64_TEX_COIN_BASE + i, w, h, outTexture );
         free( img );
     }
 

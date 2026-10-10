@@ -9,7 +9,10 @@
 #define SM64_TEX_GOOMBA_BASE 11
 #define SM64_TEX_GOOMBA_COUNT 3
 
-#define NUM_USED_TEXTURES (SM64_TEX_MARIO_COUNT + SM64_TEX_GOOMBA_COUNT)
+#define SM64_TEX_COIN_BASE 14
+#define SM64_TEX_COIN_COUNT 4
+
+#define NUM_USED_TEXTURES (SM64_TEX_MARIO_COUNT + SM64_TEX_GOOMBA_COUNT + SM64_TEX_COIN_COUNT)
 
 #define SM64_ATLAS_WIDTH (NUM_USED_TEXTURES * 64)
 #define SM64_ATLAS_HEIGHT 64
@@ -43,6 +46,8 @@ extern const int sm64_tex_heights[NUM_USED_TEXTURES];
 
 extern const int mario_tex_offsets[SM64_TEX_MARIO_COUNT];
 extern const int goomba_tex_offsets[SM64_TEX_GOOMBA_COUNT];
+extern const int coin_tex_offsets[SM64_TEX_COIN_COUNT];
 
 void load_mario_textures_from_rom( const uint8_t *rom, uint8_t *outTexture );
 void load_goomba_textures_from_rom( const uint8_t *rom, uint8_t *outTexture );
+void load_coin_textures_from_rom( const uint8_t *rom, uint8_t *outTexture );

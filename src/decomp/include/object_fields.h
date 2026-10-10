@@ -401,9 +401,11 @@
 #define /*0x0F4*/ oCoinUnkF4  OBJECT_FIELD_S32(0x1B)
 #define /*0x0F8*/ oCoinUnkF8  OBJECT_FIELD_S32(0x1C)
 #define /*0x110*/ oCoinUnk110 OBJECT_FIELD_F32(0x22)
+#define /*0x110*/ oCoinBaseVelY OBJECT_FIELD_F32(0x22)
 #ifndef VERSION_JP
 #define /*0x1B0*/ oCoinUnk1B0 OBJECT_FIELD_S32(0x4A)
 #endif
+#define /*0x1B0*/ oCoinNumBounceSoundPlayed OBJECT_FIELD_S32(0x4A)
 
 /* Collision Particle */
 #define /*0x0F4*/ oCollisionParticleUnkF4  OBJECT_FIELD_F32(0x1B)

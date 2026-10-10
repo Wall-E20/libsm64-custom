@@ -37,6 +37,14 @@ void spawn_mist_particles(void);
 void spawn_mist_particles_with_sound(u32 soundMagic);
 
 
+f32 absf(f32 x) {
+    if (x >= 0) {
+        return x;
+    } else {
+        return -x;
+    }
+}
+
 void obj_set_speed_to_zero(void) {
     o->oForwardVel = o->oVelY = 0.0f;
 }
@@ -63,6 +71,319 @@ s32 random_sign(void) {
     } else {
         return -1;
     }
+}
+
+
+
+/**
+ * Orients an object with the given normals, typically the surface under the object.
+ */
+void obj_orient_graph(struct Object *obj, f32 normalX, f32 normalY, f32 normalZ) {
+    Vec3f objVisualPosition, surfaceNormals;
+
+    Mat4 *throwMatrix;
+
+    // Passes on orienting certain objects that shouldn't be oriented, like boulders.
+    if (!sOrientObjWithFloor) {
+        return;
+    }
+
+    // Passes on orienting billboard objects, i.e. coins, trees, etc.
+    if (obj->header.gfx.node.flags & GRAPH_RENDER_BILLBOARD) {
+        return;
+    }
+
+    throwMatrix = alloc_display_list(sizeof(*throwMatrix));
+    // If out of memory, fail to try orienting the object.
+    if (throwMatrix == NULL) {
+        return;
+    }
+
+    objVisualPosition[0] = obj->oPosX;
+    objVisualPosition[1] = obj->oPosY + obj->oGraphYOffset;
+    objVisualPosition[2] = obj->oPosZ;
+
+    surfaceNormals[0] = normalX;
+    surfaceNormals[1] = normalY;
+    surfaceNormals[2] = normalZ;
+
+    mtxf_align_terrain_normal(*throwMatrix, surfaceNormals, objVisualPosition, obj->oFaceAngleYaw);
+    obj->header.gfx.throwMatrix = throwMatrix;
+}
+
+/**
+ * Determines an object's forward speed multiplier.
+ */
+void calc_obj_friction(f32 *objFriction, f32 floor_nY) {
+    if (floor_nY < 0.2 && o->oFriction < 0.9999) {
+        *objFriction = 0;
+    } else {
+        *objFriction = o->oFriction;
+    }
+}
+
+
+/**
+ * Updates an objects speed for gravity and updates Y position.
+ */
+void calc_new_obj_vel_and_pos_y(struct SM64SurfaceCollisionData *objFloor, f32 objFloorY, f32 objVelX, f32 objVelZ) {
+    f32 floor_nX = objFloor->normal.x;
+    f32 floor_nY = objFloor->normal.y;
+    f32 floor_nZ = objFloor->normal.z;
+    f32 objFriction;
+
+    // Caps vertical speed with a "terminal velocity".
+    o->oVelY -= o->oGravity;
+    if (o->oVelY > 75.0) {
+        o->oVelY = 75.0;
+    }
+    if (o->oVelY < -75.0) {
+        o->oVelY = -75.0;
+    }
+
+    o->oPosY += o->oVelY;
+
+    //Snap the object up to the floor.
+    if (o->oPosY < objFloorY) {
+        o->oPosY = objFloorY;
+
+        // Bounces an object if the ground is hit fast enough.
+        if (o->oVelY < -17.5) {
+            o->oVelY = -(o->oVelY / 2);
+        } else {
+            o->oVelY = 0;
+        }
+    }
+
+    //! (Obj Position Crash) If you got an object with height past 2^31, the game would crash.
+    if ((s32) o->oPosY >= (s32) objFloorY && (s32) o->oPosY < (s32) objFloorY + 37) {
+        obj_orient_graph(o, floor_nX, floor_nY, floor_nZ);
+
+        // Adds horizontal component of gravity for horizontal speed.
+        objVelX += floor_nX * (floor_nX * floor_nX + floor_nZ * floor_nZ)
+                   / (floor_nX * floor_nX + floor_nY * floor_nY + floor_nZ * floor_nZ) * o->oGravity
+                   * 2;
+        objVelZ += floor_nZ * (floor_nX * floor_nX + floor_nZ * floor_nZ)
+                   / (floor_nX * floor_nX + floor_nY * floor_nY + floor_nZ * floor_nZ) * o->oGravity
+                   * 2;
+
+        if (objVelX < 0.000001 && objVelX > -0.000001) {
+            objVelX = 0;
+        }
+        if (objVelZ < 0.000001 && objVelZ > -0.000001) {
+            objVelZ = 0;
+        }
+
+        if (objVelX != 0 || objVelZ != 0) {
+            o->oMoveAngleYaw = atan2s(objVelZ, objVelX);
+        }
+
+        calc_obj_friction(&objFriction, floor_nY);
+        o->oForwardVel = sqrtf(objVelX * objVelX + objVelZ * objVelZ) * objFriction;
+    }
+}
+
+void calc_new_obj_vel_and_pos_y_underwater(struct SM64SurfaceCollisionData *objFloor, f32 floorY, f32 objVelX, f32 objVelZ,
+                                    f32 waterY) {
+    f32 floor_nX = objFloor->normal.x;
+    f32 floor_nY = objFloor->normal.y;
+    f32 floor_nZ = objFloor->normal.z;
+
+    f32 netYAccel = (1.0f - o->oBuoyancy) * (-1.0f * o->oGravity);
+    o->oVelY -= netYAccel;
+
+    // Caps vertical speed with a "terminal velocity".
+    if (o->oVelY > 75.0) {
+        o->oVelY = 75.0;
+    }
+    if (o->oVelY < -75.0) {
+        o->oVelY = -75.0;
+    }
+
+    o->oPosY += o->oVelY;
+
+    //Snap the object up to the floor.
+    if (o->oPosY < floorY) {
+        o->oPosY = floorY;
+
+        // Bounces an object if the ground is hit fast enough.
+        if (o->oVelY < -17.5) {
+            o->oVelY = -(o->oVelY / 2);
+        } else {
+            o->oVelY = 0;
+        }
+    }
+
+    // If moving fast near the surface of the water, flip vertical speed? To emulate skipping?
+    if (o->oForwardVel > 12.5 && (waterY + 30.0f) > o->oPosY && (waterY - 30.0f) < o->oPosY) {
+        o->oVelY = -o->oVelY;
+    }
+
+    if ((s32) o->oPosY >= (s32) floorY && (s32) o->oPosY < (s32) floorY + 37) {
+        obj_orient_graph(o, floor_nX, floor_nY, floor_nZ);
+
+        // Adds horizontal component of gravity for horizontal speed.
+        objVelX += floor_nX * (floor_nX * floor_nX + floor_nZ * floor_nZ)
+                   / (floor_nX * floor_nX + floor_nY * floor_nY + floor_nZ * floor_nZ) * netYAccel * 2;
+        objVelZ += floor_nZ * (floor_nX * floor_nX + floor_nZ * floor_nZ)
+                   / (floor_nX * floor_nX + floor_nY * floor_nY + floor_nZ * floor_nZ) * netYAccel * 2;
+    }
+
+    if (objVelX < 0.000001 && objVelX > -0.000001) {
+        objVelX = 0;
+    }
+    if (objVelZ < 0.000001 && objVelZ > -0.000001) {
+        objVelZ = 0;
+    }
+
+    if (o->oVelY < 0.000001 && o->oVelY > -0.000001) {
+        o->oVelY = 0;
+    }
+
+    if (objVelX != 0 || objVelZ != 0) {
+        o->oMoveAngleYaw = atan2s(objVelZ, objVelX);
+    }
+
+    // Decreases both vertical velocity and forward velocity. Likely so that skips above
+    // don't loop infinitely.
+    o->oForwardVel = sqrtf(objVelX * objVelX + objVelZ * objVelZ) * 0.8;
+    o->oVelY *= 0.8;
+}
+
+/**
+ * Updates an objects position from oForwardVel and oMoveAngleYaw.
+ */
+void obj_update_pos_vel_xz(void) {
+    f32 xVel = o->oForwardVel * sins(o->oMoveAngleYaw);
+    f32 zVel = o->oForwardVel * coss(o->oMoveAngleYaw);
+
+    o->oPosX += xVel;
+    o->oPosZ += zVel;
+}
+
+
+
+
+void turn_obj_away_from_surface(f32 velX, f32 velZ, f32 nX, UNUSED f32 nY, f32 nZ, f32 *objYawX,
+                            f32 *objYawZ) {
+    *objYawX = (nZ * nZ - nX * nX) * velX / (nX * nX + nZ * nZ)
+               - 2 * velZ * (nX * nZ) / (nX * nX + nZ * nZ);
+
+    *objYawZ = (nX * nX - nZ * nZ) * velZ / (nX * nX + nZ * nZ)
+               - 2 * velX * (nX * nZ) / (nX * nX + nZ * nZ);
+}
+
+/**
+ * Finds any wall collisions, applies them, and turns away from the surface.
+ */
+s8 obj_find_wall(f32 objNewX, f32 objY, f32 objNewZ, f32 objVelX, f32 objVelZ) {
+    struct SM64WallCollisionData hitbox;
+    f32 wall_nX, wall_nY, wall_nZ, objVelXCopy, objVelZCopy, objYawX, objYawZ;
+
+    hitbox.x = objNewX;
+    hitbox.y = objY;
+    hitbox.z = objNewZ;
+    hitbox.offsetY = o->hitboxHeight / 2;
+    hitbox.radius = o->hitboxRadius;
+
+    if (find_wall_collisions(&hitbox) != 0) {
+        o->oPosX = hitbox.x;
+        o->oPosY = hitbox.y;
+        o->oPosZ = hitbox.z;
+
+        wall_nX = hitbox.walls[0]->normal.x;
+        wall_nY = hitbox.walls[0]->normal.y;
+        wall_nZ = hitbox.walls[0]->normal.z;
+
+        objVelXCopy = objVelX;
+        objVelZCopy = objVelZ;
+
+        // Turns away from the first wall only.
+        turn_obj_away_from_surface(objVelXCopy, objVelZCopy, wall_nX, wall_nY, wall_nZ, &objYawX, &objYawZ);
+
+        o->oMoveAngleYaw = atan2s(objYawZ, objYawX);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+/**
+ * Turns an object away from steep floors, similarly to walls.
+ */
+s8 turn_obj_away_from_steep_floor(struct SM64SurfaceCollisionData *objFloor, f32 floorY, f32 objVelX, f32 objVelZ) {
+    f32 floor_nX, floor_nY, floor_nZ, objVelXCopy, objVelZCopy, objYawX, objYawZ;
+
+    if (objFloor == NULL) {
+        //! (OOB Object Crash) TRUNC overflow exception after 36 minutes
+        o->oMoveAngleYaw += 32767.999200000002; /* ¯\_(ツ)_/¯ */
+        return FALSE;
+    }
+
+    floor_nX = objFloor->normal.x;
+    floor_nY = objFloor->normal.y;
+    floor_nZ = objFloor->normal.z;
+
+    // If the floor is steep and we are below it (i.e. walking into it), turn away from the floor.
+    if (floor_nY < 0.5 && floorY > o->oPosY) {
+        objVelXCopy = objVelX;
+        objVelZCopy = objVelZ;
+        turn_obj_away_from_surface(objVelXCopy, objVelZCopy, floor_nX, floor_nY, floor_nZ, &objYawX,
+                               &objYawZ);
+        o->oMoveAngleYaw = atan2s(objYawZ, objYawX);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+s16 object_step(void) {
+    f32 objX = o->oPosX;
+    f32 objY = o->oPosY;
+    f32 objZ = o->oPosZ;
+
+    f32 floorY;
+    f32 waterY = FLOOR_LOWER_LIMIT_MISC;
+
+    f32 objVelX = o->oForwardVel * sins(o->oMoveAngleYaw);
+    f32 objVelZ = o->oForwardVel * coss(o->oMoveAngleYaw);
+
+    s16 collisionFlags = 0;
+
+    // Find any wall collisions, receive the push, and set the flag.
+    if (obj_find_wall(objX + objVelX, objY, objZ + objVelZ, objVelX, objVelZ) == 0) {
+        collisionFlags += OBJ_COL_FLAG_HIT_WALL;
+    }
+
+    floorY = find_floor(objX + objVelX, objY, objZ + objVelZ, &sObjFloor);
+    if (turn_obj_away_from_steep_floor(sObjFloor, floorY, objVelX, objVelZ) == 1) {
+        waterY = find_water_level(objX + objVelX, objZ + objVelZ);
+        if (waterY > objY) {
+            calc_new_obj_vel_and_pos_y_underwater(sObjFloor, floorY, objVelX, objVelZ, waterY);
+            collisionFlags += OBJ_COL_FLAG_UNDERWATER;
+        } else {
+            calc_new_obj_vel_and_pos_y(sObjFloor, floorY, objVelX, objVelZ);
+        }
+    } else {
+        // Treat any awkward floors similar to a wall.
+        collisionFlags +=
+            ((collisionFlags & OBJ_COL_FLAG_HIT_WALL) ^ OBJ_COL_FLAG_HIT_WALL);
+    }
+
+    obj_update_pos_vel_xz();
+    if ((s32) o->oPosY == (s32) floorY) {
+        collisionFlags += OBJ_COL_FLAG_GROUNDED;
+    }
+
+    if ((s32) o->oVelY == 0) {
+        collisionFlags += OBJ_COL_FLAG_NO_Y_VEL;
+    }
+
+    // Generate a splash if in water.
+    //obj_splash((s32) waterY, (s32) o->oPosY);
+    return collisionFlags;
 }
 
 
@@ -240,6 +561,15 @@ static s32 cur_obj_detect_steep_floor(s16 steepAngleDegrees) {
     }
 
     return 0;
+}
+void cur_obj_update_floor_height(void) {
+    struct SM64SurfaceCollisionData *floor;
+    o->oFloorHeight = find_floor(o->oPosX, o->oPosY, o->oPosZ, &floor);
+}
+void cur_obj_if_hit_wall_bounce_away(void) {
+    if (o->oMoveFlags & OBJ_MOVE_HIT_WALL) {
+        o->oMoveAngleYaw = o->oWallAngle;
+    }
 }
 
 void cur_obj_hide(void) {
@@ -1029,6 +1359,96 @@ s32 obj_update_standard_actions(f32 scale) {
         }
 
         return FALSE;
+    }
+}
+
+
+
+void bhv_init_room(void) {
+    //struct SM64SurfaceCollisionData *floor;
+    //f32 floorHeight;
+    /*
+    if (is_item_in_array(gCurrLevelNum, sLevelsWithRooms)) {
+        floorHeight = find_floor(o->oPosX, o->oPosY, o->oPosZ, &floor);
+
+        if (floor != NULL) {
+            if (floor->room != 0) {
+                o->oRoom = floor->room;
+            } else {
+                // Floor probably belongs to a platform object. Try looking
+                // underneath it
+                find_floor(o->oPosX, floorHeight - 100.0f, o->oPosZ, &floor);
+                if (floor != NULL) {
+                    //! Technically possible that the room could still be 0 here
+                    o->oRoom = floor->room;
+                }
+            }
+        }
+    } else {
+        o->oRoom = -1;
+    }
+    */
+   o->oRoom = 0;
+}
+
+s32 cur_obj_wait_then_blink(s32 timeUntilBlinking, s32 numBlinks) {
+    s32 done = false;
+    s32 timeBlinking;
+
+    if (o->oTimer >= timeUntilBlinking) {
+        if ((timeBlinking = o->oTimer - timeUntilBlinking) % 2 != 0) {
+            o->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
+            if (timeBlinking / 2 > numBlinks) {
+                done = true;
+            }
+        } else {
+            o->header.gfx.node.flags &= ~GRAPH_RENDER_INVISIBLE;
+        }
+    }
+
+    return done;
+}
+
+s8 obj_flicker_and_disappear(struct Object *obj, s16 lifeSpan) {
+    if (obj->oTimer < lifeSpan) {
+        return FALSE;
+    }
+
+    if (obj->oTimer < lifeSpan + 40) {
+        if (obj->oTimer % 2 != 0) {
+            obj->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
+        } else {
+            obj->header.gfx.node.flags &= ~GRAPH_RENDER_INVISIBLE;
+        }
+    } else {
+        obj->activeFlags = ACTIVE_FLAG_DEACTIVATED;
+        return TRUE;
+    }
+
+    return FALSE;
+}
+s8 is_point_within_radius_of_mario(f32 x, f32 y, f32 z, s32 dist) {
+    f32 mGfxX = gMarioObject->header.gfx.pos[0];
+    f32 mGfxY = gMarioObject->header.gfx.pos[1];
+    f32 mGfxZ = gMarioObject->header.gfx.pos[2];
+
+    if ((x - mGfxX) * (x - mGfxX) + (y - mGfxY) * (y - mGfxY) + (z - mGfxZ) * (z - mGfxZ)
+        < (f32)(dist * dist)) {
+        return TRUE;
+    }
+
+    return FALSE;
+}
+
+void set_object_visibility(struct Object *obj, s32 dist) {
+    f32 objX = obj->oPosX;
+    f32 objY = obj->oPosY;
+    f32 objZ = obj->oPosZ;
+
+    if (is_point_within_radius_of_mario(objX, objY, objZ, dist) == TRUE) {
+        obj->header.gfx.node.flags &= ~GRAPH_RENDER_INVISIBLE;
+    } else {
+        obj->header.gfx.node.flags |= GRAPH_RENDER_INVISIBLE;
     }
 }
 

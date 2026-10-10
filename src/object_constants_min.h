@@ -5,8 +5,14 @@
 
 #define oBhvParams        oBehParams
 #define oBhvParams2ndByte oBehParams2ndByte
+static struct SM64SurfaceCollisionData *sObjFloor;
+static s8 sOrientObjWithFloor = TRUE;
 
-
+#define OBJ_COL_FLAG_GROUNDED   (1 << 0)
+#define OBJ_COL_FLAG_HIT_WALL   (1 << 1)
+#define OBJ_COL_FLAG_UNDERWATER (1 << 2)
+#define OBJ_COL_FLAG_NO_Y_VEL   (1 << 3)
+#define OBJ_COL_FLAGS_LANDED    (OBJ_COL_FLAG_GROUNDED | OBJ_COL_FLAG_NO_Y_VEL)
 //oFlags
 #define OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE         (1 <<  0)
 #define OBJ_FLAG_MOVE_XZ_USING_FVEL               (1 <<  1)
@@ -54,6 +60,12 @@
 #define OBJ_ACT_HORIZONTAL_KNOCKBACK 100
 #define OBJ_ACT_VERTICAL_KNOCKBACK   101
 #define OBJ_ACT_SQUISHED             102
+    #define MOV_YCOIN_ACT_IDLE              0
+    #define MOV_YCOIN_ACT_BLINKING          1
+    #define MOV_YCOIN_ACT_LAVA_DEATH        100
+    #define MOV_YCOIN_ACT_DEATH_PLANE_DEATH 101
+    #define MOV_BCOIN_ACT_STILL  0
+    #define MOV_BCOIN_ACT_MOVING 1
 
 
 #define RESPAWN_INFO_DONT_RESPAWN 0xFF

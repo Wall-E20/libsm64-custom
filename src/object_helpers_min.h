@@ -8,16 +8,20 @@ extern "C" {
 
 
 
+f32 absf(f32 x);
 s32 obj_update_standard_actions(f32 scale);
 void cur_obj_scale(f32 scale);
 void cur_obj_update_floor_and_walls(void);
+void cur_obj_update_floor_height(void);
 void cur_obj_init_animation_with_accel_and_sound(s32 animIndex, f32 accel);
 void cur_obj_move_standard(s16 steepSlopeAngleDegrees);
 s32 cur_obj_rotate_yaw_toward(s16 target, s16 increment);
 void cur_obj_move_y(f32 gravity, f32 bounciness, f32 buoyancy);
 s32 cur_obj_resolve_wall_collisions(void);
 struct SM64SurfaceCollisionData *cur_obj_update_floor_height_and_get_floor(void);
-
+void cur_obj_if_hit_wall_bounce_away(void);
+s8 is_point_within_radius_of_mario(f32 x, f32 y, f32 z, s32 dist);
+void set_object_visibility(struct Object *obj, s32 dist);
 s32 obj_handle_attacks(struct ObjectHitbox *hitbox, s32 attackedMarioAction, u8 *attackHandlers);
 void obj_die_if_health_non_positive(void);
 void obj_set_knockback_action(s32 attackType);
@@ -29,7 +33,7 @@ void obj_spawn_loot_coins(struct Object *obj, s32 numCoins, f32 baseVelY,
                           const BehaviorScript *coinBehavior, s16 posJitter, s16 model);
 void obj_spawn_loot_yellow_coins(struct Object *obj, s32 numCoins, f32 baseVelY);
 struct Object *spawn_object(struct Object *parent, s32 model, const BehaviorScript *behavior);
-
+s16 object_step(void);
 void treat_far_home_as_mario(f32 threshold);
 s32 obj_forward_vel_approach(f32 target, f32 delta);
 s32 obj_resolve_collisions_and_turn(s16 targetYaw, s16 turnSpeed);
@@ -62,6 +66,10 @@ void cur_obj_enable_rendering(void);
 void cur_obj_disable_rendering(void);
 f32 dist_between_objects(struct Object *obj1, struct Object *obj2);
 s16 obj_angle_to_object(struct Object *obj1, struct Object *obj2);
+
+s32 cur_obj_wait_then_blink(s32 timeUntilBlinking, s32 numBlinks);
+void bhv_init_room(void);
+s8 obj_flicker_and_disappear(struct Object *obj, s16 lifeSpan);
 
 void huge_goomba_weakly_attacked(void);
 void shelled_koopa_attack_handler(s32 attackType);
