@@ -265,8 +265,8 @@ int main( void )
         refcam[2] = cameraPos[2];
         /*/
 
-        for (int i=0; i<3; i++) marioState.position[i] = lerp(lastPos[i], currPos[i], tick);
-        for (int i=0; i<marioGeometry.numTrianglesUsed*9; i++) marioGeometry.position[i] = lerp(lastGeoPos[i], currGeoPos[i], 1.f);
+        for (int i=0; i<3; i++) marioState.position[i] = currPos[i];
+        for (int i=0; i<marioGeometry.numTrianglesUsed*9; i++) marioGeometry.position[i] = currGeoPos[i];
 
         renderer->draw( &renderState, refcam, marioState.camFocus, &marioState, &marioGeometry );
     }
