@@ -37,7 +37,7 @@ struct SM64MarioInputs
 {
     float camLookX, camLookZ;
     float stickX, stickY;
-    uint8_t buttonA, buttonB, buttonZ, buttonL, buttonR, buttonU, buttonD;
+    uint8_t buttonA, buttonB, buttonZ, buttonL, buttonR, buttonU, buttonD, RTrig;
 };
 
 struct SM64ObjectTransform

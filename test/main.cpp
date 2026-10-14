@@ -117,7 +117,7 @@ int main( void )
     uint32_t lastTicks = SDL_GetTicks();
     int cameramode = 0x01;
     audio_init();
-    sm64_set_camera_mode(cameramode, 0);
+    //sm64_set_camera_mode(cameramode, 0);
     sm64_play_music(0, 0x08 | 0x80, 0); // from decomp/include/seq_ids.h: SEQ_LEVEL_WATER | SEQ_VARIATION
 
     marioState.lodState = 1;
@@ -191,6 +191,8 @@ int main( void )
             marioInputs.buttonR = state[SDL_SCANCODE_RIGHT];
             marioInputs.buttonU = state[SDL_SCANCODE_UP];
             marioInputs.buttonD = state[SDL_SCANCODE_DOWN];
+            marioInputs.RTrig = state[SDL_SCANCODE_R];
+
         }
         else
         {
@@ -205,6 +207,7 @@ int main( void )
             marioInputs.buttonR = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT );
             marioInputs.buttonU = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_UP );
             marioInputs.buttonD = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN );
+            marioInputs.RTrig = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER );
 
 
         }
