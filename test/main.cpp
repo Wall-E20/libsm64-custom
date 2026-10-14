@@ -117,7 +117,7 @@ int main( void )
     uint32_t lastTicks = SDL_GetTicks();
     int cameramode = 0x01;
     audio_init();
-    //sm64_set_camera_mode(cameramode, 0);
+    sm64_set_camera_mode(cameramode, 0);
     sm64_play_music(0, 0x08 | 0x80, 0); // from decomp/include/seq_ids.h: SEQ_LEVEL_WATER | SEQ_VARIATION
 
     marioState.lodState = 1;
@@ -220,6 +220,12 @@ int main( void )
             }
             if (state[SDL_SCANCODE_C]){
                 sm64_mario_interact_cap(marioId,0x00000008, 1000, 1);
+            }
+            if (state[SDL_SCANCODE_F]){
+                sm64_set_camera_selection_flag(2);
+            }
+            if (state[SDL_SCANCODE_M]){
+                sm64_set_camera_selection_flag(1);
             }
         cameraRot += x0_axis * dt * 2;
         cameraPos[0] = marioState.position[0] + 1000.0f * cosf( cameraRot );
