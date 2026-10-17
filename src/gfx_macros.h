@@ -1,5 +1,4 @@
 #pragma once
-
 #include "decomp/include/types.h"
 #include "gfx_adapter_commands.h"
 
@@ -74,13 +73,14 @@ typedef struct {
 #define	G_OFF                 0
 #define	G_TEXTURE_IMAGE_FRAC  2
 
-typedef intptr_t Gfx;
+#define G_TT_RGBA16 0
+#define G_TT_NONE 0
 
 #define gdSPDefLights1(ar,ag,ab,r1,g1,b1,x1,y1,z1) {{{ {ar,ag,ab},0,{ar,ag,ab},0}}, {{{ {r1,g1,b1},0,{r1,g1,b1},0,{x1,y1,z1},0}}} }
 
 #define gsSPVertex(v, n, v0) \
     GFXCMD_VertexData, \
-    (intptr_t)v, n, v0
+    (int64_t)v, n, v0
 
 #define gsSP2Triangles(v00, v01, v02, flag0, v10, v11, v12, flag1) \
     GFXCMD_Triangle, \
@@ -97,11 +97,23 @@ typedef intptr_t Gfx;
 
 #define gsSPDisplayList(dl) \
     GFXCMD_SubDisplayList, \
-    (intptr_t)dl
+    (int64_t)dl
 
 #define gsSPLight(l, n) \
     GFXCMD_Light, \
-    (intptr_t)l, n
+    (int64_t)l, (int64_t)n
+
+#define gsSPTexture(s, t, level, tile, on) \
+    GFXCMD_Texture, \
+    s, t, on
+
+#define gsDPSetTextureImage(f, s, w, i) \
+    GFXCMD_SetTextureImage, \
+    i
+
+#define gsDPSetTileSize(t, uls, ult, lrs, lrt) \
+    GFXCMD_SetTileSize, \
+    uls, ult, lrs, lrt
 
 #define gsSPTexture(s, t, level, tile, on) \
     GFXCMD_Texture, \
@@ -117,6 +129,7 @@ typedef intptr_t Gfx;
 
 #define gsDPPipeSync() (GFXCMD_None)
 #define gsDPSetCombineMode(a, b) (GFXCMD_None)
+#define	gsDPSetCombineLERP(a0, b0, c0, d0, Aa0, Ab0, Ac0, Ad0, a1, b1, c1, d1,	Aa1, Ab1, Ac1, Ad1)	(GFXCMD_None)
 #define gsSPSetGeometryMode(word) (GFXCMD_None)
 #define gsDPLoadTextureBlock(timg, fmt, siz, width, height, pal, cms, cmt, masks, maskt, shifts, shiftt) (GFXCMD_None)
 #define gsSPClearGeometryMode(word) (GFXCMD_None)
@@ -126,3 +139,12 @@ typedef intptr_t Gfx;
 #define gsDPSetTile(fmt, siz, line, tmem, tile, palette, cmt, maskt, shiftt, cms, masks, shifts) (GFXCMD_None)
 #define gsDPLoadBlock(tile, uls, ult, lrs, dxt) (GFXCMD_None)
 #define gsDPLoadSync() (GFXCMD_None)
+#define gsDPLoadTile(tile, uls, ult, lrs, dxt) (GFXCMD_None)
+#define gsDPLoadTLUTCmd(a, b) (GFXCMD_None)
+#define gsDPSetTextureLUT(lut) (GFXCMD_None)
+
+#define gsSPSetLights1(name)						\
+	gsSPLight(&name.l,1),					\
+	gsSPLight(&name.a,2)
+
+typedef int64_t Gfx;

@@ -26,6 +26,7 @@
 #include "decomp/engine/geo_layout.h"
 #include "decomp/game/rendering_graph_node.h"
 #include "decomp/mario/geo.inc.h"
+#include "decomp/mawio/geo.inc.h"
 #include "decomp/game/platform_displacement.h"
 #include "decomp/game/sound_init.h"
 
@@ -189,7 +190,7 @@ SM64_LIB_FN int32_t sm64_mario_create( float x, float y, float z )
     {
         s_init_one_mario = true;
         s_mario_geo_pool = alloc_only_pool_init();
-        s_mario_graph_node = process_geo_layout( s_mario_geo_pool, mario_geo_ptr );
+        s_mario_graph_node = process_geo_layout( s_mario_geo_pool, mawio_geo_ptr );
     }
 
     gCurrSaveFileNum = 1;
