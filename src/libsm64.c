@@ -787,7 +787,7 @@ SM64_LIB_FN uint8_t sm64_get_camera_mode(uint16_t mode, uint16_t nframes)
 {
     return gCurrentArea->camera->mode;
 }
-SM64_LIB_FN void sm64_set_camera_selection_flag(uint16_t flag)
+SM64_LIB_FN uint32_t sm64_set_camera_selection_flag(uint16_t flag)
 {
-    cam_select_alt_mode(flag);
+    return cam_select_alt_mode(flag);
 }
