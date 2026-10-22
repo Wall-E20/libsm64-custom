@@ -192,6 +192,7 @@ int main( void )
             marioInputs.buttonU = state[SDL_SCANCODE_UP];
             marioInputs.buttonD = state[SDL_SCANCODE_DOWN];
             marioInputs.RTrig = state[SDL_SCANCODE_R];
+            marioInputs.LTrig = state[SDL_SCANCODE_L];
 
         }
         else
@@ -208,6 +209,7 @@ int main( void )
             marioInputs.buttonU = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_UP );
             marioInputs.buttonD = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN );
             marioInputs.RTrig = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER );
+            marioInputs.LTrig = SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_Y );
 
 
         }
@@ -226,6 +228,9 @@ int main( void )
             }
             if (state[SDL_SCANCODE_M]){
                 sm64_set_camera_selection_flag(1);
+            }
+            if (SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_Y )){
+                printf("a");
             }
         cameraRot += x0_axis * dt * 2;
         cameraPos[0] = marioState.position[0] + 1000.0f * cosf( cameraRot );

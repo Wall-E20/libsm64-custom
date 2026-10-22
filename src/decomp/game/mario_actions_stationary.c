@@ -22,7 +22,7 @@
 #include "../include/mario_animation_ids.h"
 #include "../include/object_fields.h"
 #include "../include/mario_geo_switch_case_ids.h"
-
+#include "../include/custom_anims/custom_anims.h"
 
 s32 check_common_idle_cancels(struct MarioState *m) {
     mario_drop_held_object(m);
@@ -1083,7 +1083,7 @@ s32 act_first_person(struct MarioState *m) {
 //  }
 
     stationary_ground_step(m);
-    set_mario_animation(m, MARIO_ANIM_FIRST_PERSON);
+    set_mario_animation(m, MIA_ANIM_FIRST_PERSON);
     return FALSE;
 }
 

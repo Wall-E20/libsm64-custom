@@ -57,6 +57,148 @@ enum UnlockDoorStarStates {
     UNLOCK_DOOR_STAR_DONE
 };
 
+static s8 gMiaAnimTableMouth[0xD1] = {
+    [0x00] = MIA_MOUTH_WATER, [0x01] = MIA_MOUTH_WAAA, [0x02] = MIA_MOUTH_WAAA,
+    [0x04] = MIA_MOUTH_U, [0x05] = MIA_MOUTH_WATER, [0x06] = MIA_MOUTH_O,
+    [0x07] = MIA_MOUTH_O, [0x08] = MIA_MOUTH_O, [0x0A] = MIA_MOUTH_HAPPY,
+    [0x0D] = MIA_MOUTH_WATER, [0x0F] = MIA_MOUTH_O, [0x13] = MIA_MOUTH_HAPPY,
+    [0x14] = MIA_MOUTH_HAPPY, [0x19] = MIA_MOUTH_O, [0x1A] = MIA_MOUTH_WATER,
+    [0x1B] = MIA_MOUTH_V, [0x1C] = MIA_MOUTH_WATER, [0x24] = MIA_MOUTH_U,
+    [0x28] = MIA_MOUTH_V, [0x29] = MIA_MOUTH_WAAA, [0x2C] = MIA_MOUTH_WAAA,
+    [0x2D] = MIA_MOUTH_WAAA, [0x33] = MIA_MOUTH_U, [0x34] = MIA_MOUTH_U,
+    [0x35] = MIA_MOUTH_O, [0x39] = MIA_MOUTH_O, [0x3A] = MIA_MOUTH_WATER,
+    [0x3C] = MIA_MOUTH_WATER, [0x3D] = MIA_MOUTH_WATER, [0x3E] = MIA_MOUTH_O,
+    [0x3F] = MIA_MOUTH_WATER, [0x41] = MIA_MOUTH_HAPPY, [0x47] = MIA_MOUTH_O,
+    [0x4A] = MIA_MOUTH_HAPPY, [0x4C] = MIA_MOUTH_O, [0x4D] = MIA_MOUTH_HAPPY,
+    [0x4F] = MIA_MOUTH_HAPPY, [0x50] = MIA_MOUTH_HAPPY, [0x52] = MIA_MOUTH_O,
+    [0x55] = MIA_MOUTH_O, [0x58] = MIA_MOUTH_V, [0x59] = MIA_MOUTH_V,
+    [0x5A] = MIA_MOUTH_U, [0x5C] = MIA_MOUTH_U, [0x5D] = MIA_MOUTH_U,
+    [0x65] = MIA_MOUTH_O, [0x66] = MIA_MOUTH_HAPPY, [0x67] = MIA_MOUTH_HAPPY,
+    [0x68] = MIA_MOUTH_O, [0x69] = MIA_MOUTH_HAPPY, [0x6A] = MIA_MOUTH_O,
+    [0x6B] = MIA_MOUTH_O, [0x6D] = MIA_MOUTH_O, [0x74] = MIA_MOUTH_O,
+    [0x75] = MIA_MOUTH_O, [0x76] = MIA_MOUTH_WAAA, [0x77] = MIA_MOUTH_V,
+    [0x78] = MIA_MOUTH_WATER, [0x7A] = MIA_MOUTH_WAAA, [0x7B] = MIA_MOUTH_V,
+    [0x7C] = MIA_MOUTH_V, [0x7D] = MIA_MOUTH_WATER, [0x7E] = MIA_MOUTH_WATER,
+    [0x7F] = MIA_MOUTH_WATER, [0x80] = MIA_MOUTH_WATER,
+    [0x82] = MIA_MOUTH_V, [0x83] = MIA_MOUTH_O, [0x85] = MIA_MOUTH_CAT,
+    [0x86] = MIA_MOUTH_CAT, [0x87] = MIA_MOUTH_CAT, [0x88] = MIA_MOUTH_O,
+    [0x89] = MIA_MOUTH_O, [0x8A] = MIA_MOUTH_V, [0x8C] = MIA_MOUTH_U,
+    [0x8E] = MIA_MOUTH_U, [0x91] = MIA_MOUTH_U, [0x92] = MIA_MOUTH_O,
+    [0x95] = MIA_MOUTH_O, [0x99] = MIA_MOUTH_CAT, [0x9C] = MIA_MOUTH_HAPPY,
+    [0x9E] = MIA_MOUTH_V, [0xA8] = MIA_MOUTH_V, [0xAE] = MIA_MOUTH_O,
+    [0xB3] = MIA_MOUTH_HAPPY, [0xB5] = MIA_MOUTH_V, [0xB6] = MIA_MOUTH_V,
+    [0xB7] = MIA_MOUTH_V, [0xB8] = MIA_MOUTH_WATER, [0xB9] = MIA_MOUTH_WATER,
+    [0xBB] = MIA_MOUTH_WATER, [0xBC] = MIA_MOUTH_O,
+    [0xBD] = MIA_MOUTH_O, [0xC0] = MIA_MOUTH_HAPPY, [0xC1] = MIA_MOUTH_HAPPY,
+    [0xC2] = MIA_MOUTH_U, [0xC6] = MIA_MOUTH_WATER, [0xC7] = MIA_MOUTH_WATER,
+    [0xCD] = MIA_MOUTH_HAPPY, [0xD0] = MIA_MOUTH_HAPPY, [0xCC] = MIA_MOUTH_HAPPY,[0xCB] = MIA_MOUTH_HAPPY,
+};
+
+static s8 gMiaAnimTableEyes[0xD1] = {
+    [0x1D] = 8, [0x27] = 8, [0x6E] = 8, [0xB3] = 8, [0xCD] = 8,
+    [0xC0] = 9, [0x4F] = 9, [0x66] = 9, [0x7C] = 9,
+    [0x7B] = 9, [0x74] = 9, [0x75] = 9, [0x2D] = 9,
+    [0x02] = 9, [0xA8] = 9, [0x9E] = 9, [0x31] = 9,
+    [0x71] = 9, [0x8A] = 9, [0x76] = 9, [0x29] = 9,
+    [0x01] = 9, [0x2C] = 9, [0x3A] = 9, [0x94] = 9,
+    [0x7A] = 9, [0xB7] = 9, [0xB5] = 9, [0x59] = 9,
+    [0x58] = 9,
+    [0x4C] = MARIO_EYES_LOOK_DOWN - 1, [0x3D] = MARIO_EYES_LOOK_DOWN - 1,
+    [0x1C] = MARIO_EYES_LOOK_DOWN - 1, [0x56] = MARIO_EYES_LOOK_DOWN - 1,
+    [0x0D] = MARIO_EYES_LOOK_DOWN - 1, [0xC6] = MARIO_EYES_LOOK_DOWN - 1,
+    [0xC7] = MARIO_EYES_LOOK_DOWN - 1, [0x2B] = MARIO_EYES_LOOK_DOWN - 1,
+    [0x50] = MARIO_EYES_LOOK_UP - 1, [0x05] = MARIO_EYES_LOOK_UP - 1,
+    [0x95] = MARIO_EYES_LOOK_UP - 1, [0x33] = MARIO_EYES_LOOK_UP - 1,
+    [0x35] = MARIO_EYES_LOOK_UP - 1,
+    [0x0F] = MARIO_EYES_LOOK_RIGHT - 1, [0xBC] = MARIO_EYES_LOOK_RIGHT - 1,
+    [0x7F] = MARIO_EYES_LOOK_RIGHT - 1, [0x80] = MARIO_EYES_LOOK_LEFT - 1,
+    [0x36] = MARIO_EYES_CLOSED - 1, [0x37] = MARIO_EYES_CLOSED - 1,
+    [0x81] = MARIO_EYES_HALF_CLOSED - 1, [0x82] = MARIO_EYES_HALF_CLOSED - 1,
+    [0x84] = MARIO_EYES_HALF_CLOSED - 1, [0x83] = MARIO_EYES_HALF_CLOSED - 1,
+};
+
+static void mia_special_expressions(struct MarioState *m, s16 *eyeState, s16 *mouthState) {
+    s16 animID = m->marioObj->header.gfx.animInfo.animID;
+    s16 animFrame = m->marioObj->header.gfx.animInfo.animFrame;
+
+    *eyeState = -1;
+    *mouthState = -1;
+    if (m->action == ACT_IDLE && m->actionTimer >= 7) {
+        *eyeState = MARIO_EYES_HALF_CLOSED - 1;
+    } else if (animID == MARIO_ANIM_TURNING_PART2 && animFrame < 9) {
+        *eyeState = MARIO_EYES_LOOK_RIGHT - 1;
+        *mouthState = MIA_MOUTH_O;
+    } else if (animID == MARIO_ANIM_TRIPLE_JUMP_LAND && animFrame > 20) {
+        *eyeState = MARIO_EYES_BLINK;
+        *mouthState = MIA_MOUTH_NORMAL;
+    } else if (animID == MARIO_ANIM_GROUND_KICK && animFrame > 15) {
+        *eyeState = MARIO_EYES_BLINK;
+        *mouthState = MIA_MOUTH_NORMAL;
+    } else if (animID == MARIO_ANIM_TRIPLE_JUMP && animFrame > 30) {
+        *eyeState = MARIO_EYES_LOOK_DOWN - 1;
+        *mouthState = MIA_MOUTH_O;
+    } else if ((animID == MARIO_ANIM_FAST_LONGJUMP || animID == MARIO_ANIM_SLOW_LONGJUMP)
+               && animFrame > 11) {
+        *mouthState = MIA_MOUTH_O;
+    } else if (animID == MARIO_ANIM_TAKE_CAP_OFF_THEN_ON && animFrame > 83) {
+        *eyeState = MARIO_EYES_BLINK;
+    } else if (m->action == ACT_SOFT_BONK || m->action == ACT_SHOCKWAVE_BOUNCE
+                 || (m->particleFlags & PARTICLE_FIRE)
+               || (m->hurtCounter > 0 && !(m->action & ACT_GROUP_CUTSCENE))) {
+        *eyeState = 9;
+        *mouthState = MIA_MOUTH_V;
+    } else if ((m->flags & MARIO_UNKNOWN_18) && !(m->action & ACT_GROUP_CUTSCENE)) {
+        *eyeState = 9;
+        *mouthState = MIA_MOUTH_WAAA;
+    } else if (m->action == ACT_STEEP_JUMP) {
+        *mouthState = MIA_MOUTH_O;
+    }
+
+    if (*mouthState < 0 && m->action == ACT_WALKING && m->forwardVel > 38.0f) {
+        *mouthState = MIA_MOUTH_HAPPY;
+    }
+    if (animID == 0xCD) {
+        if (animFrame < 27){
+            *mouthState = MIA_MOUTH_HAPPY;
+            *eyeState = MARIO_EYES_BLINK;
+            //hands = MARIO_HAND_FISTS;
+        }else if (animFrame >= 27 && animFrame < 48) {
+             *mouthState = MIA_MOUTH_O;
+             *eyeState = 9;
+             //hands = MARIO_HAND_OPEN;
+        }else if (animFrame >= 48 && animFrame <= 57) {
+            *mouthState = MIA_MOUTH_NORMAL;
+            *eyeState = MARIO_EYES_CLOSED  - 1;
+            //hands = MARIO_HAND_FISTS ;
+        }else if (animFrame > 57) {
+             *mouthState = MIA_MOUTH_HAPPY;
+             *eyeState = 8;
+             //hands = MARIO_HAND_PEACE_SIGN;
+        }
+    }
+    if (m->action == ACT_WALKING || m->action == ACT_BUTT_SLIDE ||
+            m->action == ACT_DIVE_SLIDE ||
+            m->action == ACT_STOMACH_SLIDE ||
+            m->action == ACT_HOLD_BUTT_SLIDE ||
+            m->action == ACT_SLIDE_KICK_SLIDE ||
+            m->action == ACT_HOLD_STOMACH_SLIDE) {
+        if (m->input & INPUT_NONZERO_ANALOG) {
+            if (m->faceAngle[1] < m->intendedYaw) {
+                *eyeState = MARIO_EYES_LOOK_RIGHT - 1;
+            }
+
+            if (m->faceAngle[1] > m->intendedYaw) {
+                *eyeState = MARIO_EYES_LOOK_LEFT - 1;
+            }
+        }
+    }
+    if ((m->health < 0x300) && !(m->action & ACT_GROUP_CUTSCENE)) {
+        *mouthState = MIA_MOUTH_V;
+    }
+}
+
+
+#define CLAMP(x, low, high)  MIN(MAX((x), (low)), (high))
 /**
  * The eye texture on succesive frames of Mario's blink animation.
  * He intentionally blinks twice each time.
@@ -573,7 +715,7 @@ Gfx *geo_mario_rotate_wing_cap_wings(s32 callContext, struct GraphNode *node, UN
 Gfx *geo_switch_mario_hand_grab_pos(s32 callContext, struct GraphNode *b, Mat4 *mtx) {
     struct GraphNodeHeldObject *asHeldObj = (struct GraphNodeHeldObject *) b;
     Mat4 *curTransform = mtx;
-    struct MarioState *marioState = gMarioState; // &gMarioStates[asHeldObj->playerIndex]; // PATCH
+    struct MarioState *marioState = gMarioState; // &gMarioState[asHeldObj->playerIndex]; // PATCH
 
     if (callContext == GEO_CONTEXT_RENDER) {
         asHeldObj->objNode = NULL;
@@ -614,7 +756,7 @@ Gfx *geo_switch_mario_hand_grab_pos(s32 callContext, struct GraphNode *b, Mat4 *
  */
 Gfx *geo_render_mirror_mario(s32 callContext, struct GraphNode *node, UNUSED Mat4 *c) {
 //  f32 mirroredX;
-//  struct Object *mario = gMarioState->marioObj; // PATCH  gMarioStates[0].marioObj;
+//  struct Object *mario = gMarioState->marioObj; // PATCH  gMarioState[0].marioObj;
 
 //  switch (callContext) {
 //      case GEO_CONTEXT_CREATE:
@@ -672,5 +814,157 @@ Gfx *geo_mirror_mario_backface_culling(s32 callContext, struct GraphNode *node, 
 //      asGenerated->fnNode.node.flags = (asGenerated->fnNode.node.flags & 0xFF) | (LAYER_OPAQUE << 8);
 //  }
 //  return gfx;
+    return NULL;
+}
+
+
+
+
+//mia    miaaa
+
+Gfx *mia_eyes_func(s32 callContext, struct GraphNode *node, UNUSED Mat4 *mtx) {
+    
+    struct GraphNodeSwitchCase *switchCase = (struct GraphNodeSwitchCase *) node;
+    struct MarioState *m = gMarioState;
+    struct MarioBodyState *bodyState = &gBodyStates[switchCase->numCases];
+    s16 eyeState;
+    s16 mouthState;
+    s16 animID;
+    s16 targetYawVel = (-(s16)(10.0 * gController.stickX));
+    s16 targetPitchVel = (-(s16)(10.0 * gController.stickY));
+
+    if (callContext == GEO_CONTEXT_RENDER) {
+        animID = m->marioObj->header.gfx.animInfo.animID;
+        mia_special_expressions(m, &eyeState, &mouthState);
+        
+        if (m->action & ACT_FLAG_SWIMMING_OR_FLYING) {
+            if (targetYawVel > 0) {
+                eyeState = MARIO_EYES_LOOK_RIGHT -1;
+            }
+            if (targetYawVel < 0) {
+                eyeState = MARIO_EYES_LOOK_LEFT -1;
+            }
+            if (targetPitchVel > 0) {
+                eyeState = MARIO_EYES_LOOK_UP-1;
+            }
+            if (targetPitchVel < 0) {
+                eyeState = MARIO_EYES_LOOK_DOWN-1;
+            }
+        }
+        
+        if (eyeState < 0) {
+            eyeState = (animID >= 0 && animID < 0xD1) ? gMiaAnimTableEyes[animID] : 0;
+            if (bodyState->eyeState != 0) {
+                eyeState = bodyState->eyeState - 1;
+            }
+        }
+        
+        switchCase->selectedCase = eyeState;
+    }
+    
+    return NULL;
+}
+Gfx *mia_extra_switch_func(s32 callContext, struct GraphNode *node, UNUSED Mat4 *mtx) {
+    
+    struct GraphNodeSwitchCase *switchCase = (struct GraphNodeSwitchCase *) node;
+    struct MarioBodyState *bodyState = &gBodyStates[switchCase->numCases];
+    struct GraphNodeGenerated *asGenerated = (struct GraphNodeGenerated *) node;
+    struct MarioState *m = gMarioState;
+
+    if (callContext == GEO_CONTEXT_RENDER) {
+        if (asGenerated->parameter == 0){
+            if (m->waterLevel > m->pos[1] + 70){ 
+                switchCase->selectedCase = 1;
+            }else{
+                switchCase->selectedCase = 0;
+            }
+        
+        }else{
+        switchCase->selectedCase = 0;
+        }
+    }
+    
+    return NULL; 
+}
+
+Gfx *mia_mouth_func(s32 callContext, struct GraphNode *node, UNUSED Mat4 *mtx) {
+    
+    struct GraphNodeSwitchCase *switchCase = (struct GraphNodeSwitchCase *) node;
+    struct GraphNodeGenerated *asGenerated = (struct GraphNodeGenerated *) node;
+    struct Object *mario = gMarioState->marioObj;
+    struct MarioState *m = gMarioState;
+    
+    if (callContext == GEO_CONTEXT_RENDER) {
+            s16 animID = mario->header.gfx.animInfo.animID;
+            s16 eyeState;
+            s16 mouthState;
+
+            switchCase->selectedCase = (animID >= 0 && animID < 0xD1)
+                ? gMiaAnimTableMouth[animID]
+                : MIA_MOUTH_NORMAL;
+            mia_special_expressions(gMarioState, &eyeState, &mouthState);
+
+            if ((m->action & ACT_FLAG_SWIMMING) || ((m->input & INPUT_IN_POISON_GAS) && !(m->action & ACT_GROUP_CUTSCENE))) {
+                mouthState = MIA_MOUTH_WATER;
+            }
+        if (mouthState >= 0) {
+            switchCase->selectedCase = mouthState;
+        }
+    }
+    
+    return NULL;
+}
+
+
+
+Gfx *geo_physbone_chain(s32 callContext, struct GraphNode *node, UNUSED Mat4 *mtx) {
+    
+    struct GraphNodeGenerated *asGenerated = (struct GraphNodeGenerated *) node;
+    struct MarioState *m = gMarioState;
+    struct MarioBodyState *bodyState = &gBodyStates[asGenerated->parameter];
+
+
+
+    if (callContext == GEO_CONTEXT_RENDER) {
+        struct GraphNodeTranslationRotation *rotNode = (struct GraphNodeTranslationRotation *) node->next;
+        
+        rotNode->rotation[0] += bodyState->headAngle[2];
+        rotNode->rotation[2] += bodyState->headAngle[0];
+
+        rotNode->translation[0] = 0;
+        rotNode->translation[1] = 0;
+        rotNode->translation[2] = 0;
+
+        if (m->waterLevel > (m->pos[1] + 120)) {
+                
+            rotNode->rotation[2] = m->marioObj->header.gfx.angle[0] - DEGREES(90);
+
+            if (DEGREES(rotNode->rotation[2]) > - 35) {
+                rotNode->rotation[2] = DEGREES(-35);
+            }
+        }else if(m->area->camera->mode == CAMERA_MODE_C_UP) {
+            rotNode->rotation[2] = m->statusForCamera->headRotation[0] *0.8;
+        }else if (!(m->action & ACT_GROUP_CUTSCENE)){
+            rotNode->rotation[2] = DEGREES((-(sins(m->marioObj->header.gfx.angle[1]) * m->vel[0]) + -(coss(m->marioObj->header.gfx.angle[1]) * m->vel[2])));
+                
+            if ((bodyState->action & ACT_FLAG_AIR) != 0){
+                 rotNode->rotation[2] += DEGREES(CLAMP(m->vel[1], DEGREES(-10.0), DEGREES(90.0 - 25.0)));
+            }
+                rotNode->rotation[1] = DEGREES(180) + DEGREES((-(coss(m->marioObj->header.gfx.angle[1]) * m->vel[0]) + (sins(m->marioObj->header.gfx.angle[1]) * m->vel[2])));
+
+            if (rotNode->rotation[2] > 0x461){
+                rotNode->rotation[2] = 0x461;
+            }
+            if (rotNode->rotation[2] < -16000){
+                rotNode->rotation[2] = -16000;
+            }
+        }else{
+            rotNode->rotation[2] = 0;
+        }
+        //char text[14];
+        //sprintf(text, "%#04d", rotNode->rotation[2]);
+        //print_text(20, 100, text);
+    }
+    
     return NULL;
 }

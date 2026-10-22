@@ -17,7 +17,7 @@ else
 endif
 CFLAGS := -fno-strict-aliasing -g -Wall -Wno-unused-function -fPIC -fvisibility=hidden -DSM64_LIB_EXPORT -DGBI_FLOATS -DVERSION_US -DNO_SEGMENTED_MEMORY
 
-SRC_DIRS  := src src/decomp src/decomp/engine src/decomp/include/PR src/decomp/game src/decomp/pc src/decomp/pc/audio src/decomp/mario src/decomp/mawio src/decomp/tools src/decomp/audio
+SRC_DIRS  := src src/decomp src/decomp/engine src/decomp/include/PR src/decomp/include/custom_anims src/decomp/game src/decomp/pc src/decomp/pc/audio src/decomp/mario src/decomp/mia src/decomp/tools src/decomp/audio
 BUILD_DIR := build
 DIST_DIR  := dist
 ALL_DIRS  := $(addprefix $(BUILD_DIR)/,$(SRC_DIRS))
@@ -26,7 +26,7 @@ LIB_FILE   := $(DIST_DIR)/libsm64.so
 LIB_H_FILE := $(DIST_DIR)/include/libsm64.h
 TEST_FILE  := run-test
 
-C_IMPORTED := src/decomp/mario/geo.inc.c src/decomp/mario/model.inc.c src/decomp/mawio/geo.inc.c src/decomp/mawio/model.inc.c
+C_IMPORTED := src/decomp/mario/geo.inc.c src/decomp/mario/model.inc.c src/decomp/mia/geo.inc.c src/decomp/mia/model.inc.c
 H_IMPORTED := $(C_IMPORTED:.c=.h)
 IMPORTED   := $(C_IMPORTED) $(H_IMPORTED)
 

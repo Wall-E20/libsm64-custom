@@ -18,6 +18,10 @@
 #include "../include/mario_animation_ids.h"
 #include "../include/object_fields.h"
 #include "../include/mario_geo_switch_case_ids.h"
+#include "mario_actions_moving.h"
+
+#define approach_s32_symmetric(current, target, inc) approach_s32((current), (target), (inc), (inc))
+
 
 struct LandingAction {
     s16 numFrames;
@@ -434,7 +438,7 @@ s32 update_decelerating_speed(struct MarioState *m) {
 
     return stopped;
 }
-
+/*
 void update_walking_speed(struct MarioState *m) {
     f32 maxTargetSpeed;
     f32 targetSpeed;
@@ -465,6 +469,52 @@ void update_walking_speed(struct MarioState *m) {
 
     m->faceAngle[1] =
         m->intendedYaw - approach_s32((s16)(m->intendedYaw - m->faceAngle[1]), 0, 0x800, 0x800);
+    apply_slope_accel(m);
+}
+*/
+
+void update_walking_speed(struct MarioState *m) {
+    f32 maxTargetSpeed;
+    f32 targetSpeed;
+
+    if (m->floor != NULL && m->floor->type == SURFACE_SLOW) {
+        maxTargetSpeed = 24.0f;
+    } else {
+        maxTargetSpeed = 32.0f;
+    }
+
+    targetSpeed = m->intendedMag < maxTargetSpeed ? m->intendedMag : maxTargetSpeed;
+
+    if (m->quicksandDepth > 10.0f) {
+        targetSpeed *= 6.25f / m->quicksandDepth;
+    }
+    if (m->controller->buttonDown & L_TRIG){
+        targetSpeed *= 1.4f;
+    }
+
+    if (m->forwardVel <= 0.0f) {
+        // Slow down if moving backwards
+        m->forwardVel += 1.1f;
+    } else if (m->forwardVel <= targetSpeed) {
+        // If accelerating
+        m->forwardVel += 1.1f - m->forwardVel / 43.0f;
+        if (m->controller->buttonDown & L_TRIG){
+            m->forwardVel += 1.1f - m->forwardVel / 60.0f;
+        }
+    } else if (m->floor->normal.y >= 0.95f) {
+        m->forwardVel -= 1.0f;
+        if (m->controller->buttonDown & L_TRIG){
+            m->forwardVel -= 1.0f;
+        }
+    }
+
+    if (m->forwardVel > 48.0f) {
+        m->forwardVel = 48.0f;
+    }
+
+    m->faceAngle[1] =
+        m->intendedYaw - approach_s32((s16)(m->intendedYaw - m->faceAngle[1]), 0, 0x800, 0x800);
+
     apply_slope_accel(m);
 }
 
@@ -516,7 +566,7 @@ s32 begin_braking_action(struct MarioState *m) {
 
     return set_mario_action(m, ACT_DECELERATING, 0);
 }
-
+/*
 void anim_and_audio_for_walk(struct MarioState *m) {
     s32 val14;
     struct Object *marioObj = m->marioObj;
@@ -605,6 +655,105 @@ void anim_and_audio_for_walk(struct MarioState *m) {
 
     marioObj->oMarioWalkingPitch =
         (s16) approach_s32(marioObj->oMarioWalkingPitch, targetPitch, 0x800, 0x800);
+    marioObj->header.gfx.angle[0] = marioObj->oMarioWalkingPitch;
+}
+*/
+
+void anim_and_audio_for_walk(struct MarioState *m) {
+    s32 animSpeed;
+    struct Object *marioObj = m->marioObj;
+    s32 inLoop = TRUE;
+    s16 targetPitch = 0;
+
+    f32 intendedSpeed = MAX(m->intendedMag, m->forwardVel);
+
+    if (intendedSpeed < 4.0f) {
+        intendedSpeed = 4.0f;
+    }
+
+    if (m->quicksandDepth > 50.0f) {
+        animSpeed = (s32)(intendedSpeed / 4.0f * 0x10000);
+        set_mario_anim_with_accel(m, MARIO_ANIM_MOVE_IN_QUICKSAND, animSpeed);
+        play_step_sound(m, 19, 93);
+        m->actionTimer = WALK_SPEED_START_TIPTOE;
+    } else {
+        while (inLoop) {
+            switch (m->actionTimer) {
+                case WALK_SPEED_START_TIPTOE:
+                    if (intendedSpeed > 8.0f) {
+                        m->actionTimer = WALK_SPEED_WALKING;
+                    } else {
+                        //! (Speed Crash) If Mario's speed is more than 2^17.
+                        animSpeed = (s32)(intendedSpeed / 4.0f * 0x10000);
+                        if (animSpeed < 0x1000) {
+                            animSpeed = 0x1000;
+                        }
+                        set_mario_anim_with_accel(m, MARIO_ANIM_START_TIPTOE, animSpeed);
+                        play_step_sound(m, 7, 22);
+                        if (is_anim_past_frame(m, 23)) {
+                            m->actionTimer = WALK_SPEED_WALKING;
+                        }
+
+                        inLoop = FALSE;
+                    }
+                    break;
+
+                case WALK_SPEED_TIPTOE:
+                    if (intendedSpeed > 8.0f) {
+                        m->actionTimer = WALK_SPEED_WALKING;
+                    } else {
+                        //! (Speed Crash) If Mario's speed is more than 2^17.
+                        animSpeed = (s32)(intendedSpeed * 0x10000);
+                        if (animSpeed < 0x1000) {
+                            animSpeed = 0x1000;
+                        }
+                        set_mario_anim_with_accel(m, MARIO_ANIM_TIPTOE, animSpeed);
+                        play_step_sound(m, 14, 72);
+
+                        inLoop = FALSE;
+                    }
+                    break;
+
+                case WALK_SPEED_WALKING:
+                    if (intendedSpeed < 5.0f) {
+                        m->actionTimer = WALK_SPEED_TIPTOE;
+                    } else if (intendedSpeed > 22.0f) {
+                        m->actionTimer = WALK_SPEED_RUNNING;
+                    } else {
+                        //! (Speed Crash) If Mario's speed is more than 2^17.
+                        animSpeed = (s32)(intendedSpeed / 4.0f * 0x10000);
+                        set_mario_anim_with_accel(m, MARIO_ANIM_WALKING, animSpeed);
+                        play_step_sound(m, 10, 49);
+
+                        inLoop = FALSE;
+                    }
+                    break;
+
+                case WALK_SPEED_RUNNING:
+                    if (intendedSpeed < 18.0f) {
+                        m->actionTimer = WALK_SPEED_WALKING;
+                    } else if(intendedSpeed > 38.0f){
+                        animSpeed = (s32)(intendedSpeed / 4.0f * 0x10000);
+                            set_mario_anim_with_accel(m, MARIO_ANIM_RUNNING_UNUSED, animSpeed);
+                            m->particleFlags |= PARTICLE_DUST;
+                            inLoop = FALSE;
+                            play_step_sound(m, 9, 45);
+                    }else{ 
+
+                        //! (Speed Crash) If Mario's speed is more than 2^17.
+                        animSpeed = (s32)(intendedSpeed / 4.0f * 0x10000);
+                        set_mario_anim_with_accel(m, MARIO_ANIM_RUNNING, animSpeed);
+                        play_step_sound(m, 9, 45);
+                        targetPitch = tilt_body_running(m);
+
+                        inLoop = FALSE;
+                    }
+                    break;
+            }
+        }
+    }
+
+    marioObj->oMarioWalkingPitch = approach_s32_symmetric(marioObj->oMarioWalkingPitch, targetPitch, 0x800);
     marioObj->header.gfx.angle[0] = marioObj->oMarioWalkingPitch;
 }
 

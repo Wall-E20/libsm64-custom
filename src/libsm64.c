@@ -26,7 +26,7 @@
 #include "decomp/engine/geo_layout.h"
 #include "decomp/game/rendering_graph_node.h"
 #include "decomp/mario/geo.inc.h"
-#include "decomp/mawio/geo.inc.h"
+#include "decomp/mia/geo.inc.h"
 #include "decomp/game/platform_displacement.h"
 #include "decomp/game/sound_init.h"
 
@@ -39,6 +39,7 @@
 #include "obj_pool.h"
 #include "fake_interaction.h"
 #include "decomp/game/camera.h"
+#include "decomp/include/custom_anims/custom_anims.h"
 
 static struct AllocOnlyPool *s_mario_geo_pool = NULL;
 static struct GraphNode *s_mario_graph_node = NULL;
@@ -111,6 +112,7 @@ SM64_LIB_FN void sm64_global_init( const uint8_t *rom, uint8_t *outTexture )
 
     load_mario_textures_from_rom( rom, outTexture );
     load_mario_anims_from_rom( rom );
+    load_custom_anims();
 
     gCurGraphNodeCamera = malloc(sizeof(struct GraphNodeCamera));
     
@@ -190,7 +192,7 @@ SM64_LIB_FN int32_t sm64_mario_create( float x, float y, float z )
     {
         s_init_one_mario = true;
         s_mario_geo_pool = alloc_only_pool_init();
-        s_mario_graph_node = process_geo_layout( s_mario_geo_pool, mawio_geo_ptr );
+        s_mario_graph_node = process_geo_layout( s_mario_geo_pool, mia_geo_ptr );
     }
 
     gCurrSaveFileNum = 1;
@@ -255,6 +257,7 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     update_button( inputs->buttonL, L_CBUTTONS );
     update_button( inputs->buttonR, R_CBUTTONS );
     update_button( inputs->RTrig, R_TRIG );
+    update_button( inputs->RTrig, L_TRIG );
     gMarioState->marioObj->header.gfx.cameraToObject[0] = 0;
     gMarioState->marioObj->header.gfx.cameraToObject[1] = 0;
     gMarioState->marioObj->header.gfx.cameraToObject[2] = 0;

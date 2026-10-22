@@ -41,5 +41,14 @@ enum MarioGrabPosGSCId
     /*0x02*/ GRAB_POS_HEAVY_OBJ,
     /*0x03*/ GRAB_POS_BOWSER
 };
-
+enum MiaMouthGSCId{
+    MIA_MOUTH_NORMAL,
+    MIA_MOUTH_CAT,
+    MIA_MOUTH_HAPPY,
+    MIA_MOUTH_U,
+    MIA_MOUTH_O,
+    MIA_MOUTH_V,
+    MIA_MOUTH_WATER,
+    MIA_MOUTH_WAAA,
+};
 #endif // MARIO_GEO_SWITCH_CASE_IDS_H
