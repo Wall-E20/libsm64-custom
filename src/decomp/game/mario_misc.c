@@ -27,6 +27,7 @@
 #include "../include/mario_animation_ids.h"
 #include "../include/object_fields.h"
 #include "../include/mario_geo_switch_case_ids.h"
+#include "../include/custom_anims/custom_anims.h"
 
 static Vec3s gVec3sZero = {0,0,0};
 
@@ -57,7 +58,7 @@ enum UnlockDoorStarStates {
     UNLOCK_DOOR_STAR_DONE
 };
 
-static s8 gMiaAnimTableMouth[0xD1] = {
+static s8 gMiaAnimTableMouth[] = {
     [0x00] = MIA_MOUTH_WATER, [0x01] = MIA_MOUTH_WAAA, [0x02] = MIA_MOUTH_WAAA,
     [0x04] = MIA_MOUTH_U, [0x05] = MIA_MOUTH_WATER, [0x06] = MIA_MOUTH_O,
     [0x07] = MIA_MOUTH_O, [0x08] = MIA_MOUTH_O, [0x0A] = MIA_MOUTH_HAPPY,
@@ -91,7 +92,7 @@ static s8 gMiaAnimTableMouth[0xD1] = {
     [0xBB] = MIA_MOUTH_WATER, [0xBC] = MIA_MOUTH_O,
     [0xBD] = MIA_MOUTH_O, [0xC0] = MIA_MOUTH_HAPPY, [0xC1] = MIA_MOUTH_HAPPY,
     [0xC2] = MIA_MOUTH_U, [0xC6] = MIA_MOUTH_WATER, [0xC7] = MIA_MOUTH_WATER,
-    [0xCD] = MIA_MOUTH_HAPPY, [0xD0] = MIA_MOUTH_HAPPY, [0xCC] = MIA_MOUTH_HAPPY,[0xCB] = MIA_MOUTH_HAPPY,
+    [0xCD] = MIA_MOUTH_HAPPY, [0xD0] = MIA_MOUTH_HAPPY, [0xCC] = MIA_MOUTH_HAPPY,[0xCB] = MIA_MOUTH_HAPPY
 };
 
 static s8 gMiaAnimTableEyes[0xD1] = {
@@ -154,10 +155,15 @@ static void mia_special_expressions(struct MarioState *m, s16 *eyeState, s16 *mo
         *mouthState = MIA_MOUTH_O;
     }
 
-    if (*mouthState < 0 && m->action == ACT_WALKING && m->forwardVel > 38.0f) {
+    if (*mouthState < 0 && m->action == ACT_WALKING && m->forwardVel > 40.0f) {
         *mouthState = MIA_MOUTH_HAPPY;
     }
-    if (animID == 0xCD) {
+    if (animID == MIA_ANIM_JUMP){
+        *mouthState = MIA_MOUTH_HAPPY;
+    } else if (animID == MIA_ANIM_FIRST_PERSON){
+        *mouthState = MIA_MOUTH_U;
+    }
+    if (animID == MIA_ANIM_STAR_DANCE) {
         if (animFrame < 27){
             *mouthState = MIA_MOUTH_HAPPY;
             *eyeState = MARIO_EYES_BLINK;
@@ -176,6 +182,7 @@ static void mia_special_expressions(struct MarioState *m, s16 *eyeState, s16 *mo
              //hands = MARIO_HAND_PEACE_SIGN;
         }
     }
+
     if (m->action == ACT_WALKING || m->action == ACT_BUTT_SLIDE ||
             m->action == ACT_DIVE_SLIDE ||
             m->action == ACT_STOMACH_SLIDE ||
@@ -204,6 +211,9 @@ static void mia_special_expressions(struct MarioState *m, s16 *eyeState, s16 *mo
  * He intentionally blinks twice each time.
  */
 static s8 gMarioBlinkAnimation[7] = { 1, 2, 1, 0, 1, 2, 1 };
+
+//mia...mia
+static s8 gMiaBlinkAnimation[6] = { 1, 2, 2, 1, 0, 0 };
 
 /**
  * The scale values per frame for Mario's foot/hand for his attack animation
@@ -832,7 +842,7 @@ Gfx *mia_eyes_func(s32 callContext, struct GraphNode *node, UNUSED Mat4 *mtx) {
     s16 animID;
     s16 targetYawVel = (-(s16)(10.0 * gController.stickX));
     s16 targetPitchVel = (-(s16)(10.0 * gController.stickY));
-
+    s16 blinkFrame;
     if (callContext == GEO_CONTEXT_RENDER) {
         animID = m->marioObj->header.gfx.animInfo.animID;
         mia_special_expressions(m, &eyeState, &mouthState);
@@ -858,8 +868,17 @@ Gfx *mia_eyes_func(s32 callContext, struct GraphNode *node, UNUSED Mat4 *mtx) {
                 eyeState = bodyState->eyeState - 1;
             }
         }
+        if (eyeState == 0) {
+            blinkFrame = ((switchCase->numCases * 32 + gAreaUpdateCounter) >> 1) & 0x1F;
+            if (blinkFrame < 6) {
+                switchCase->selectedCase = gMiaBlinkAnimation[blinkFrame];
+            } else {
+                switchCase->selectedCase = 0;
+            }
+        } else {
+            switchCase->selectedCase = eyeState;
+        }
         
-        switchCase->selectedCase = eyeState;
     }
     
     return NULL;

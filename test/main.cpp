@@ -229,9 +229,6 @@ int main( void )
             if (state[SDL_SCANCODE_M]){
                 sm64_set_camera_selection_flag(1);
             }
-            if (SDL_GameControllerGetButton( controller, SDL_CONTROLLER_BUTTON_Y )){
-                printf("a");
-            }
         cameraRot += x0_axis * dt * 2;
         cameraPos[0] = marioState.position[0] + 1000.0f * cosf( cameraRot );
         cameraPos[1] = marioState.position[1] + 200.0f;

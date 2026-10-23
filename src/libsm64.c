@@ -257,7 +257,7 @@ SM64_LIB_FN void sm64_mario_tick( int32_t marioId, const struct SM64MarioInputs 
     update_button( inputs->buttonL, L_CBUTTONS );
     update_button( inputs->buttonR, R_CBUTTONS );
     update_button( inputs->RTrig, R_TRIG );
-    update_button( inputs->RTrig, L_TRIG );
+    update_button( inputs->LTrig, L_TRIG );
     gMarioState->marioObj->header.gfx.cameraToObject[0] = 0;
     gMarioState->marioObj->header.gfx.cameraToObject[1] = 0;
     gMarioState->marioObj->header.gfx.cameraToObject[2] = 0;

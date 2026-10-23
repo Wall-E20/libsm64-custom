@@ -19,6 +19,8 @@
 #include "../include/mario_animation_ids.h"
 #include "../include/object_fields.h"
 #include "../include/mario_geo_switch_case_ids.h"
+#include "../include/custom_anims/custom_anims.h"
+
 
 void play_flip_sounds(struct MarioState *m, s16 frame1, s16 frame2, s16 frame3) {
     s32 animFrame = m->marioObj->header.gfx.animInfo.animFrame;
@@ -454,7 +456,7 @@ s32 act_jump(struct MarioState *m) {
     }
 
     play_mario_sound(m, SOUND_ACTION_TERRAIN_JUMP, 0);
-    common_air_action_step(m, ACT_JUMP_LAND, MARIO_ANIM_SINGLE_JUMP,
+    common_air_action_step(m, ACT_JUMP_LAND, MIA_ANIM_JUMP,
                            AIR_STEP_CHECK_LEDGE_GRAB | AIR_STEP_CHECK_HANG);
     return FALSE;
 }
@@ -825,7 +827,7 @@ s32 act_water_jump(struct MarioState *m) {
     }
 
     play_mario_sound(m, SOUND_ACTION_UNKNOWN432, 0);
-    set_mario_animation(m, MARIO_ANIM_SINGLE_JUMP);
+    set_mario_animation(m, MIA_ANIM_JUMP);
 
     switch (perform_air_step(m, AIR_STEP_CHECK_LEDGE_GRAB)) {
         case AIR_STEP_LANDED:
@@ -908,7 +910,7 @@ s32 act_steep_jump(struct MarioState *m) {
             break;
     }
 
-    set_mario_animation(m, MARIO_ANIM_SINGLE_JUMP);
+    set_mario_animation(m, MIA_ANIM_JUMP);
     m->marioObj->header.gfx.angle[1] = m->marioObj->oMarioSteepJumpYaw;
     return FALSE;
 }
@@ -990,7 +992,7 @@ s32 act_burning_jump(struct MarioState *m) {
         set_mario_action(m, ACT_BURNING_GROUND, 0);
     }
 
-    set_mario_animation(m, m->actionArg == 0 ? MARIO_ANIM_SINGLE_JUMP : MARIO_ANIM_FIRE_LAVA_BURN);
+    set_mario_animation(m, m->actionArg == 0 ? MIA_ANIM_JUMP : MARIO_ANIM_FIRE_LAVA_BURN);
     m->particleFlags |= PARTICLE_FIRE;
     play_sound(SOUND_MOVING_LAVA_BURN, m->marioObj->header.gfx.cameraToObject);
 

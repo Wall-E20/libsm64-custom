@@ -19,6 +19,7 @@
 #include "../include/object_fields.h"
 #include "../include/mario_geo_switch_case_ids.h"
 #include "mario_actions_moving.h"
+#include "../include/custom_anims/custom_anims.h"
 
 #define approach_s32_symmetric(current, target, inc) approach_s32((current), (target), (inc), (inc))
 
@@ -732,9 +733,9 @@ void anim_and_audio_for_walk(struct MarioState *m) {
                 case WALK_SPEED_RUNNING:
                     if (intendedSpeed < 18.0f) {
                         m->actionTimer = WALK_SPEED_WALKING;
-                    } else if(intendedSpeed > 38.0f){
+                    } else if(intendedSpeed > 40.0f){
                         animSpeed = (s32)(intendedSpeed / 4.0f * 0x10000);
-                            set_mario_anim_with_accel(m, MARIO_ANIM_RUNNING_UNUSED, animSpeed);
+                            set_mario_anim_with_accel(m, MIA_ANIM_RUN_FAST, animSpeed);
                             m->particleFlags |= PARTICLE_DUST;
                             inLoop = FALSE;
                             play_step_sound(m, 9, 45);
@@ -742,7 +743,7 @@ void anim_and_audio_for_walk(struct MarioState *m) {
 
                         //! (Speed Crash) If Mario's speed is more than 2^17.
                         animSpeed = (s32)(intendedSpeed / 4.0f * 0x10000);
-                        set_mario_anim_with_accel(m, MARIO_ANIM_RUNNING, animSpeed);
+                        set_mario_anim_with_accel(m, MIA_ANIM_RUN, animSpeed);
                         play_step_sound(m, 9, 45);
                         targetPitch = tilt_body_running(m);
 

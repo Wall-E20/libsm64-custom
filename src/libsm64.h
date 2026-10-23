@@ -153,7 +153,7 @@ struct SM64SurfaceCollisionData
 
 enum
 {
-    SM64_TEXTURE_WIDTH = 64 * 11,
+    SM64_TEXTURE_WIDTH = 64 * 22,
     SM64_TEXTURE_HEIGHT = 64,
     SM64_GEO_MAX_TRIANGLES = 1024,
 };

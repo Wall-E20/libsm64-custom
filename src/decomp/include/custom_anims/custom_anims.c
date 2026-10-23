@@ -25,5 +25,5 @@ void load_custom_anims(){
     MIA_ANIM_JUMP = load_mario_custom_anim_from_data(miaAnimJumpRaw,miaAnimJumpRaw_length);
     MIA_ANIM_RUN = load_mario_custom_anim_from_data(miaAnimRunRaw,miaAnimRunRaw_length);
     MIA_ANIM_RUN_FAST = load_mario_custom_anim_from_data(miaAnimRunFastRaw,miaAnimRunFastRaw_length);
-    MIA_ANIM_STAR_DANCE = load_mario_custom_anim_from_data(miaAnimStarDance,miaAnimStarDance_length);
+    MIA_ANIM_STAR_DANCE = load_mario_custom_anim_from_data(miaAnimStarDanceRaw,miaAnimStarDanceRaw_length);
 }
